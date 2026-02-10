@@ -92,7 +92,7 @@ export async function getUserDashboard(
     throw new ApiError("Authentication required. Please log in.", 401);
   }
 
-  const url = `${API_BASE}/user/dashboard?page=${page}&limit=${limit}`;
+  const url = `/api/user/dashboard?page=${page}&limit=${limit}`;
 
   const response = await fetch(url, {
     method: "GET",
@@ -146,7 +146,7 @@ export async function getUserOrders(
     throw new ApiError("Authentication required. Please log in.", 401);
   }
 
-  const url = `${API_BASE}/user/orders?page=${page}&limit=${limit}&sort=${sort}`;
+  const url = `/api/user/orders?page=${page}&limit=${limit}&sort=${sort}`;
 
   const response = await fetch(url, {
     method: "GET",
@@ -198,7 +198,7 @@ export async function updateProfile(payload: {
     throw new ApiError("Authentication required. Please log in.", 401);
   }
 
-  const url = `${API_BASE}/user/profile`;
+  const url = `/api/user/profile`;
 
   const response = await fetch(url, {
     method: "PATCH",

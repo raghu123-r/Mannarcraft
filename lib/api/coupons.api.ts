@@ -3,7 +3,7 @@
  * Admin API functions for managing coupons
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'https://kk-backend-5c11.onrender.com/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || '';
 
 function getAdminToken() {
   if (typeof window === 'undefined') return null;
@@ -75,7 +75,7 @@ export async function listCoupons(params: ListCouponsParams = {}) {
   if (params.expired !== undefined) queryParams.append('expired', params.expired.toString());
   if (params.search) queryParams.append('search', params.search);
 
-  const url = `${API_BASE}/admin/coupons?${queryParams.toString()}`;
+  const url = `/api/admin/coupons?${queryParams.toString()}`;
 
   const response = await fetch(url, {
     method: 'GET',
@@ -101,7 +101,7 @@ export async function getCoupon(id: string) {
   const token = getAdminToken();
   if (!token) throw new Error('Admin authentication required');
 
-  const response = await fetch(`${API_BASE}/admin/coupons/${id}`, {
+  const response = await fetch(`/api/admin/coupons/${id}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ export async function createCoupon(payload: CreateCouponPayload) {
   const token = getAdminToken();
   if (!token) throw new Error('Admin authentication required');
 
-  const response = await fetch(`${API_BASE}/admin/coupons`, {
+  const response = await fetch(`/api/admin/coupons`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ export async function updateCoupon(id: string, payload: Partial<CreateCouponPayl
   const token = getAdminToken();
   if (!token) throw new Error('Admin authentication required');
 
-  const response = await fetch(`${API_BASE}/admin/coupons/${id}`, {
+  const response = await fetch(`/api/admin/coupons/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -175,7 +175,7 @@ export async function deleteCoupon(id: string) {
   const token = getAdminToken();
   if (!token) throw new Error('Admin authentication required');
 
-  const response = await fetch(`${API_BASE}/admin/coupons/${id}`, {
+  const response = await fetch(`/api/admin/coupons/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ export async function applyCoupon(payload: ApplyCouponPayload) {
   const token = getAdminToken();
   if (!token) throw new Error('Admin authentication required');
 
-  const response = await fetch(`${API_BASE}/admin/coupons/apply`, {
+  const response = await fetch(`/api/admin/coupons/apply`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -232,7 +232,7 @@ export async function applyCouponForUser(code: string, cartItems: any[]) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}/coupons/apply`, {
+  const response = await fetch(`/api/coupons/apply`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ code, cartItems }),
@@ -253,7 +253,7 @@ export async function applyCouponForUser(code: string, cartItems: any[]) {
  * Returns only active, valid coupons without admin-only fields
  */
 export async function getActiveCoupons() {
-  const response = await fetch(`${API_BASE}/coupons/active`, {
+  const response = await fetch(`/api/coupons/active`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

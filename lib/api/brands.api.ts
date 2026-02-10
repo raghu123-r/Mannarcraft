@@ -31,7 +31,7 @@ export interface BrandsPaginatedResponse {
  */
 export async function getBrands(): Promise<Brand[]> {
   try {
-    const response = await apiFetch<BrandsApiResponse>("/brands");
+    const response = await apiFetch<BrandsApiResponse>("/api/brands");
 
     // ADAPTER: Normalize response using adapter
     return normalizeBrandsResponse(response);
@@ -49,7 +49,7 @@ export async function getBrands(): Promise<Brand[]> {
  */
 export async function getBrandsPaginated(page: number = 1, limit: number = 12): Promise<BrandsPaginatedResponse> {
   try {
-    const response = await apiFetch<any>(`/brands?page=${page}&limit=${limit}`);
+    const response = await apiFetch<any>(`/api/brands?page=${page}&limit=${limit}`);
 
     // Handle paginated response from backend
     const data = normalizeBrandsResponse(response);
@@ -87,7 +87,7 @@ export async function getBrand(slug: string): Promise<Brand | null> {
   
   try {
     // Primary attempt: backend should handle slug/id/variations
-    const response = await apiFetch<BrandApiResponse>(`/brands/${encodedSlug}`);
+    const response = await apiFetch<BrandApiResponse>(`/api/brands/${encodedSlug}`);
     
     // ADAPTER: Normalize response using adapter
     const brand = normalizeBrandResponse(response);

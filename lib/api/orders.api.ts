@@ -18,7 +18,7 @@ import {
 } from "@/lib/adapters/order.adapter";
 
 // Base API URL for direct backend calls (when needed)
-const API_BASE_URL = "https://kk-backend-5c11.onrender.com";
+const API_BASE_URL = "";
 
 /**
  * Fetch with authentication and envelope unwrapping
@@ -98,7 +98,7 @@ export async function fetchWithAuth(
  */
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   try {
-    const response = await apiFetch<CreateOrderApiResponse>("/orders", {
+    const response = await apiFetch<CreateOrderApiResponse>("/api/orders", {
       method: "POST",
       body: JSON.stringify(payload),
     });

@@ -72,7 +72,7 @@ function ProductsPageContent() {
           params.set("brand", brandFilter);
         }
         
-        const data = await apiGet(`/products?${params.toString()}`);
+        const data = await apiGet(`/api/products?${params.toString()}`);
         
         // Handle both array response and object with items
         const items = Array.isArray(data) ? data : (data?.items ?? []);

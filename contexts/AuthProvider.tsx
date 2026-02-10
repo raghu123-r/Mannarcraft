@@ -92,7 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
           
           // Other errors
-          console.error("backendGetProfile error:", err);
+          if (!err?.message?.includes("session has expired")) {
+            console.error("backendGetProfile error:", err);
+          }
           setUser(null);
           setProfile(null);
           return;

@@ -6,7 +6,7 @@
 import { apiFetch, ApiError } from "@/lib/api";
 import { getAccessToken } from "@/lib/utils/auth";
 
-const API_BASE_URL = "https://kk-backend-5c11.onrender.com";
+const API_BASE_URL = "";
 
 /**
  * Fetch with authentication and envelope unwrapping

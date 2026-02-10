@@ -40,7 +40,7 @@ export async function getProductReviews(
 ): Promise<PaginatedReviewsResponse> {
   try {
     const data = await apiGet<PaginatedReviewsResponse>(
-      `/reviews/products/${productId}/reviews?page=${page}`
+      `/api/reviews/products/${productId}/reviews?page=${page}`
     );
     return data || {
       reviews: [],
@@ -66,7 +66,7 @@ export async function getProductReviews(
  */
 export async function submitReview(reviewData: CreateReviewData): Promise<Review> {
   try {
-    const data = await apiPost<Review>('/reviews', reviewData);
+    const data = await apiPost<Review>('/api/reviews', reviewData);
     return data;
   } catch (error) {
     console.error('Failed to submit review:', error);

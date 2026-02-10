@@ -109,20 +109,39 @@ main > *:first-child {
 }
 
 /* --- BEGIN: stronger tablet spacing override (reversible) --- */
-/* Purpose: ensure centered container has comfortable horizontal padding on tablet and larger */
 main .max-w-8xl.mx-auto {
-  padding-left: 1rem !important;   /* 16px on mobile */
+  padding-left: 1rem !important;
   padding-right: 1rem !important;
   box-sizing: border-box !important;
 }
 
 @media (min-width: 640px) {
   main .max-w-8xl.mx-auto {
-    padding-left: 1.5rem !important; /* 24px on tablet and larger */
+    padding-left: 1.5rem !important;
     padding-right: 1.5rem !important;
   }
 }
-/* Keep header offset rule safe — do not add variable if missing */
-main { padding-top: var(--kk-header-offset, 0); }
+
+main {
+  padding-top: var(--kk-header-offset, 0);
+}
 /* --- END: stronger tablet spacing override (reversible) --- */
 
+
+/* ==================================================== */
+/* MANNARCRAFT-STYLE CONTINUOUS ANNOUNCEMENT MARQUEE    */
+/* (SAFE ADDITION – DOES NOT AFFECT OTHER STYLES)       */
+/* ==================================================== */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 18s linear infinite;
+}

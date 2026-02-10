@@ -1,5 +1,12 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState, useMemo, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+} from "react";
 import { getAccessToken } from "@/lib/utils/auth";
 import {
   addToCart as apiAddToCart,
@@ -12,13 +19,13 @@ import {
 
 export type CartItem = {
   id: string;
-  productId?: string; // alias for id
+  productId?: string;
   name: string;
   price: number;
-  qty: number; // always a number, never undefined
+  qty: number;
   image_url?: string;
-  variantId?: string; // optional variant ID
-  variantName?: string; // optional variant name for display
+  variantId?: string;
+  variantName?: string;
 };
 
 type CartContextValue = {
@@ -26,10 +33,10 @@ type CartContextValue = {
   count: number;
   distinctCount: number;
   total: number;
-  addItem: (item: Partial<CartItem>, qty?: number) => Promise<void> | void;
-  removeItem: (id: string, variantId?: string) => Promise<void> | void;
-  clearCart: () => Promise<void> | void;
-  updateQty: (id: string, qty: number, variantId?: string) => Promise<void> | void;
+  addItem: (item: Partial<CartItem>, qty?: number) => void;
+  removeItem: (id: string, variantId?: string) => void;
+  clearCart: () => void;
+  updateQty: (id: string, qty: number, variantId?: string) => void;
 };
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -40,128 +47,111 @@ export function useCart() {
   return ctx;
 }
 
-// Normalize any raw cart item to consistent shape
+/* ---------------- helpers ---------------- */
+
 function normalizeCartItem(raw: any): CartItem {
-  const id = raw.id || raw.productId || raw._id || '';
+  const id = raw.id || raw.productId || raw._id || "";
   return {
     id,
-    productId: id, // alias
-    name: raw.name || raw.title || 'Product',
+    productId: id,
+    name: raw.name || raw.title || "Product",
     price: Number(raw.price) || 0,
     qty: Number(raw.qty) || Number(raw.quantity) || 1,
-    image_url: raw.image_url || raw.image || '',
-    variantId: raw.variantId || undefined,
-    variantName: raw.variantName || undefined,
+    image_url: raw.image_url || raw.image || "",
+    variantId: raw.variantId,
+    variantName: raw.variantName,
   };
 }
 
 function backendToLocal(cart: BackendCart): CartItem[] {
-  return (cart.items || []).map((bi) => normalizeCartItem({
-    id: bi.productId,
-    name: bi.title,
-    price: bi.price,
-    qty: bi.qty,
-    image_url: bi.image,
-    variantId: bi.variantId,
-    variantName: bi.variantName,
-  }));
+  return (cart.items || []).map((bi) =>
+    normalizeCartItem({
+      id: bi.productId,
+      name: bi.title,
+      price: bi.price,
+      qty: bi.qty,
+      image_url: bi.image,
+      variantId: bi.variantId,
+      variantName: bi.variantName,
+    })
+  );
 }
 
-// Read initial cart synchronously from localStorage
 function readInitialCart(): CartItem[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem("kk_cart");
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed.map(normalizeCartItem) : [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }
 
+/* ---------------- provider ---------------- */
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  // Initialize synchronously so product cards see cart items immediately
   const [items, setItems] = useState<CartItem[]>(readInitialCart);
   const itemsRef = useRef<CartItem[]>(items);
 
-  // Keep ref in sync for storage listener
+  // keep ref synced
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
-  // Keep ref in sync for storage listener
+  /* 🔑 KEY FIX: fetch backend cart ONLY when token exists */
   useEffect(() => {
-    itemsRef.current = items;
-  }, [items]);
+    const token = getAccessToken();
+    if (!token) return;
 
-  // On mount: if logged in, fetch backend cart to merge/override
-  useEffect(() => {
     (async () => {
       try {
-        const token = getAccessToken();
-        if (token) {
-          const remote: BackendCart = await apiGetCart();
-          const mapped = backendToLocal(remote);
-          setItems(mapped);
-        }
-      } catch (e) {
-        // silent: if backend fetch fails, keep localStorage state
+        const remote = await apiGetCart();
+        setItems(backendToLocal(remote));
+      } catch {
+        // silent: user not logged in / expired token
       }
     })();
-  }, []);
+  }, [getAccessToken()]); // re-run after login
 
-  // Persist to localStorage whenever items change
+  // persist to localStorage
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     try {
       localStorage.setItem("kk_cart", JSON.stringify(items));
-    } catch (e) {
-      // ignore storage errors
-    }
+    } catch {}
   }, [items]);
 
-  // Listen for cross-tab storage changes - use ref to avoid recreating handler
+  // cross-tab sync
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key !== 'kk_cart' || !e.newValue) return;
-      
+    if (typeof window === "undefined") return;
+
+    const handler = (e: StorageEvent) => {
+      if (e.key !== "kk_cart" || !e.newValue) return;
       try {
-        // Use functional update with ref to avoid stale closure
-        setItems(prev => {
-          const prevJson = JSON.stringify(prev);
-          if (prevJson === e.newValue) return prev; // prevent loop
-          const parsed = JSON.parse(e.newValue!);
-          return Array.isArray(parsed) ? parsed.map(normalizeCartItem) : prev;
-        });
-      } catch (err) {
-        // ignore parse errors
-      }
+        const parsed = JSON.parse(e.newValue);
+        if (Array.isArray(parsed)) {
+          setItems(parsed.map(normalizeCartItem));
+        }
+      } catch {}
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []); // Empty deps - handler uses functional update
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
 
-  // Helper to merge server snapshot into local items
-  const applyServerCart = (serverCart?: BackendCart | null) => {
-    if (!serverCart) return;
-    const mapped = backendToLocal(serverCart);
-    setItems(mapped);
-  };
+  /* ---------------- actions ---------------- */
 
-  const addItem = (item: Partial<CartItem>, qty: number = 1) => {
+  const addItem = (item: Partial<CartItem>, qty = 1) => {
     const normalized = normalizeCartItem({ ...item, qty });
-    
+
     setItems((prev) => {
-      // Find existing item by composite key (id + variantId)
-      const idx = prev.findIndex((p) => 
-        p.id === normalized.id && 
-        (p.variantId || null) === (normalized.variantId || null)
+      const idx = prev.findIndex(
+        (p) =>
+          p.id === normalized.id &&
+          (p.variantId || null) === (normalized.variantId || null)
       );
-      
       if (idx > -1) {
         const copy = [...prev];
         copy[idx] = { ...copy[idx], qty: copy[idx].qty + qty };
@@ -170,79 +160,83 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prev, normalized];
     });
 
-    // If logged in, persist to backend in background
-    (async () => {
-      try {
-        const token = getAccessToken();
-        if (!token) return;
-        const serverCart = await apiAddToCart(normalized.id, qty, normalized.variantId);
-        applyServerCart(serverCart);
-      } catch (e) {
-        // silent failure
-      }
-    })();
+    const token = getAccessToken();
+    if (!token) return;
+
+    apiAddToCart(normalized.id, qty, normalized.variantId)
+      .then((c) => setItems(backendToLocal(c)))
+      .catch(() => {});
   };
 
   const removeItem = (id: string, variantId?: string) => {
-    setItems((prev) => prev.filter((p) => 
-      !(p.id === id && (p.variantId || null) === (variantId || null))
-    ));
+    setItems((prev) =>
+      prev.filter(
+        (p) => !(p.id === id && (p.variantId || null) === (variantId || null))
+      )
+    );
 
-    (async () => {
-      try {
-        const token = getAccessToken();
-        if (!token) return;
-        const serverCart = await apiRemoveCartItem(id, variantId);
-        applyServerCart(serverCart);
-      } catch (e) {}
-    })();
+    const token = getAccessToken();
+    if (!token) return;
+
+    apiRemoveCartItem(id, variantId)
+      .then((c) => setItems(backendToLocal(c)))
+      .catch(() => {});
   };
 
   const clearCart = () => {
     setItems([]);
 
-    (async () => {
-      try {
-        const token = getAccessToken();
-        if (!token) return;
-        const serverCart = await apiClearCart();
-        applyServerCart(serverCart);
-      } catch (e) {}
-    })();
+    const token = getAccessToken();
+    if (!token) return;
+
+    apiClearCart()
+      .then((c) => setItems(backendToLocal(c)))
+      .catch(() => {});
   };
 
   const updateQty = (id: string, qty: number, variantId?: string) => {
-    setItems((prev) => prev.map((p) => 
-      (p.id === id && (p.variantId || null) === (variantId || null)) 
-        ? { ...p, qty } 
-        : p
-    ));
+    setItems((prev) =>
+      prev.map((p) =>
+        p.id === id && (p.variantId || null) === (variantId || null)
+          ? { ...p, qty }
+          : p
+      )
+    );
 
-    (async () => {
-      try {
-        const token = getAccessToken();
-        if (!token) return;
-        const serverCart = await apiUpdateCartItem(id, qty, variantId);
-        applyServerCart(serverCart);
-      } catch (e) {}
-    })();
+    const token = getAccessToken();
+    if (!token) return;
+
+    apiUpdateCartItem(id, qty, variantId)
+      .then((c) => setItems(backendToLocal(c)))
+      .catch(() => {});
   };
 
-  // Memoized count to avoid recalculation
-  const count = useMemo(() => items.reduce((s, it) => s + (Number(it.qty) || 0), 0), [items]);
-  const distinctCount = useMemo(() => items.length, [items]);
-  const total = useMemo(() => items.reduce((s, it) => s + (Number(it.qty) || 0) * it.price, 0), [items]);
+  /* ---------------- derived ---------------- */
 
-  const value: CartContextValue = {
-    items,
-    count,
-    distinctCount,
-    total,
-    addItem,
-    removeItem,
-    clearCart,
-    updateQty,
-  };
+  const count = useMemo(
+    () => items.reduce((s, it) => s + it.qty, 0),
+    [items]
+  );
+  const distinctCount = items.length;
+  const total = useMemo(
+    () => items.reduce((s, it) => s + it.qty * it.price, 0),
+    [items]
+  );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider
+      value={{
+        items,
+        count,
+        distinctCount,
+        total,
+        addItem,
+        removeItem,
+        clearCart,
+        updateQty,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
 }

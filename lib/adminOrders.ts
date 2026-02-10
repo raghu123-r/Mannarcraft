@@ -5,7 +5,7 @@ import { apiGet, apiPost, apiPut } from "./api";
    Matches backend: /api/admin/orders
 =============================================== */
 
-const BASE = "/admin/orders";
+const BASE = "/api/admin/orders";
 
 /**
  * GET /api/admin/orders
@@ -59,7 +59,7 @@ export async function uploadAdminOrderAttachment(id: string, file: File) {
   const form = new FormData();
   form.append("attachment", file);
 
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}${BASE}/${id}/upload`;
+  const url = `/api/admin/orders/${id}/upload`;
 
   const res = await fetch(url, {
     method: "POST",

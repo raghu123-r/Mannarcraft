@@ -4,10 +4,9 @@
  */
 
 import { getAccessToken } from "@/lib/utils/auth";
-import { ApiError } from "@/lib/api";
+import { ApiError, buildUrl } from "@/lib/api";
 
-// Base API URL for cart endpoints
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://kk-backend-5c11.onrender.com/api";
+// ❗️IMPORTANT: use the SAME env + builder as the rest of the app
 
 /**
  * Cart item from backend
@@ -33,7 +32,6 @@ export interface BackendCart {
 /**
  * Fetch with authentication that understands backend envelope
  * { statusCode, success, error, data }
- * Returns `data` directly for success, throws ApiError for failures
  */
 async function fetchWithAuth(
   path: string,
@@ -45,53 +43,51 @@ async function fetchWithAuth(
     throw new ApiError("No authentication token found", 401);
   }
 
-  const url = `${API_BASE_URL}${path}`;
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-    ...opts.headers,
-  };
+  // ✅ build URL using shared helper (respects localhost / prod)
+  const url = buildUrl(path);
 
   const response = await fetch(url, {
     ...opts,
-    headers,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...(opts.headers || {}),
+    },
   });
 
-  // Parse response body
   const text = await response.text().catch(() => null);
   let body: any = null;
+
   try {
     body = text ? JSON.parse(text) : null;
-  } catch (e) {
+  } catch {
     body = text;
   }
 
-  // Handle backend envelope format: { statusCode, success, error, data }
+  // Handle backend envelope
   if (body && typeof body === "object" && ("statusCode" in body || "success" in body)) {
     const statusCode = body.statusCode ?? response.status;
-    const okFlag = body.success === true;
 
-    if (!okFlag) {
-      // Extract error message from envelope
+    if (!body.success) {
       const errMsg =
-        (body.error && (body.error.message || JSON.stringify(body.error))) ||
+        body.error?.message ||
         body.message ||
-        body.error ||
-        `Request failed with status ${statusCode}`;
-      const details = body.error?.details ?? body.details ?? null;
-      throw new ApiError(errMsg, statusCode, details);
+        `Request failed (${statusCode})`;
+
+      throw new ApiError(errMsg, statusCode, body.error?.details);
     }
 
-    // Success: return inner data property
     return body.data;
   }
 
-  // Fallback for non-envelope responses
+  // Fallback (non-envelope)
   if (!response.ok) {
-    const errMsg =
-      (body && (body.message || JSON.stringify(body))) ||
-      `API error: ${response.status}`;
-    throw new ApiError(errMsg, response.status, body);
+    throw new ApiError(
+      body?.message || `API error (${response.status})`,
+      response.status,
+      body
+    );
   }
 
   return body;
@@ -99,19 +95,13 @@ async function fetchWithAuth(
 
 /**
  * Get user's cart
- * @returns Cart with items and total
  */
 export async function getCart(): Promise<BackendCart> {
-  const data = await fetchWithAuth("/cart");
-  return data || { items: [], total: 0 };
+  return (await fetchWithAuth("/api/cart")) || { items: [], total: 0 };
 }
 
 /**
  * Add product to cart
- * @param productId - Product ID
- * @param qty - Quantity to add (default: 1)
- * @param variantId - Optional variant ID
- * @returns Updated cart
  */
 export async function addToCart(
   productId: string,
@@ -119,10 +109,9 @@ export async function addToCart(
   variantId?: string,
 ): Promise<BackendCart> {
   const payload: any = { productId, qty };
-  if (variantId) {
-    payload.variantId = variantId;
-  }
-  return fetchWithAuth("/cart", {
+  if (variantId) payload.variantId = variantId;
+
+  return fetchWithAuth("/api/cart", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -130,10 +119,6 @@ export async function addToCart(
 
 /**
  * Update cart item quantity
- * @param productId - Product ID
- * @param qty - New quantity (0 or negative removes item)
- * @param variantId - Optional variant ID (required if item has variant)
- * @returns Updated cart
  */
 export async function updateCartItem(
   productId: string,
@@ -141,10 +126,9 @@ export async function updateCartItem(
   variantId?: string,
 ): Promise<BackendCart> {
   const payload: any = { productId, qty };
-  if (variantId) {
-    payload.variantId = variantId;
-  }
-  return fetchWithAuth("/cart/item", {
+  if (variantId) payload.variantId = variantId;
+
+  return fetchWithAuth("/api/cart/item", {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
@@ -152,30 +136,23 @@ export async function updateCartItem(
 
 /**
  * Remove item from cart
- * @param productId - Product ID to remove
- * @param variantId - Optional variant ID (required if item has variant)
- * @returns Updated cart
  */
 export async function removeCartItem(
   productId: string,
   variantId?: string,
 ): Promise<BackendCart> {
   const payload: any = { productId };
-  if (variantId) {
-    payload.variantId = variantId;
-  }
-  return fetchWithAuth("/cart/item", {
+  if (variantId) payload.variantId = variantId;
+
+  return fetchWithAuth("/api/cart/item", {
     method: "DELETE",
     body: JSON.stringify(payload),
   });
 }
 
 /**
- * Clear all items from cart
- * @returns Empty cart
+ * Clear cart
  */
 export async function clearCart(): Promise<BackendCart> {
-  return fetchWithAuth("/cart/clear", {
-    method: "POST",
-  });
+  return fetchWithAuth("/api/cart/clear", { method: "POST" });
 }

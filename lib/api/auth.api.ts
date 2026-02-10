@@ -106,7 +106,7 @@ export function logout(): void {
  * @returns User object or null if not authenticated
  */
 export async function getProfile(): Promise<User | null> {
-  const endpoints = ["/auth/me", "/me", "/auth/profile", "/profile"];
+  const endpoints = ["/api/auth/me", "/api/me", "/api/auth/profile", "/api/profile"];
 
   for (const endpoint of endpoints) {
     try {

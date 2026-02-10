@@ -30,38 +30,27 @@ export interface ProductsApiResponse {
 
 /**
  * Fetch products by brand ID or slug
- * @param brandId - Brand ObjectId or slug
- * @returns Array of products
- * @throws Error if API request fails
  */
 export async function getProductsByBrand(brandId: string): Promise<Product[]> {
-  try {
-    const data = await apiFetch<any>(`/products?brand=${encodeURIComponent(brandId)}`);
-    // Normalize to always return array
-    return normalizeListResponse(data, ['items', 'products']);
-  } catch (error) {
-    console.error(`Failed to fetch products for brand "${brandId}":`, error);
-    throw error;
-  }
+  const data = await apiFetch<ProductsApiResponse>(
+    `/api/products?brand=${encodeURIComponent(brandId)}`
+  );
+  return data?.items || [];
 }
 
 /**
- * Fetch all products with optional filters
- * @param params - Query parameters (q, brand, category, page, limit)
- * @returns Array of products
- * @throws Error if API request fails
+ * Fetch products with filters
+ * NOTE: backend supports ONLY category (slug or ObjectId)
  */
-export async function getProducts(params?: Record<string, string | number>): Promise<Product[]> {
-  try {
-    const queryString = params 
-      ? '?' + new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)])).toString()
-      : '';
-    
-    const data = await apiFetch<any>(`/products${queryString}`);
-    // Normalize to always return array
-    return normalizeListResponse(data, ['items', 'products']);
-  } catch (error) {
-    console.error("Failed to fetch products:", error);
-    throw error;
-  }
+export async function getProducts(
+  params?: Record<string, string | number>
+): Promise<Product[]> {
+  const queryString = params
+    ? "?" + new URLSearchParams(
+        Object.entries(params).map(([k, v]) => [k, String(v)])
+      ).toString()
+    : "";
+
+  const data = await apiFetch<ProductsApiResponse>(`/api/products${queryString}`);
+  return data?.items || [];
 }

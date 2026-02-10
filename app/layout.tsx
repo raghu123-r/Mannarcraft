@@ -2,6 +2,7 @@
 
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import SecondaryNavbar from "@/components/SecondaryNavbar";
 import Footer from "@/components/Footer";
 import ClientProviders from "@/components/ClientProviders";
 import { CartProvider } from "@/components/CartContext";
@@ -15,12 +16,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const hideFooter = pathname.startsWith('/admin') || pathname.startsWith('/account');
-  const hideNavbar = pathname.startsWith('/admin') || pathname.startsWith('/account');
+
+  const hideFooter =
+    pathname.startsWith("/admin") || pathname.startsWith("/account");
+
+  const hideNavbar =
+    pathname.startsWith("/admin") || pathname.startsWith("/account");
+
+  const hideSecondaryNavbar =
+    pathname.startsWith("/admin") || pathname.startsWith("/account");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // ensure page opens at top on navigation
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
   }, [pathname]);
@@ -31,8 +38,16 @@ export default function RootLayout({
         <CartProvider>
           <ClientProviders>
             <ToastProvider>
+              {/* MAIN NAVBAR */}
               {!hideNavbar && <Navbar />}
-              <main className="min-h-screen bg-gray-50">{children}</main>
+
+              {/* SECONDARY CATEGORY NAVBAR */}
+              {!hideSecondaryNavbar && <SecondaryNavbar />}
+
+              <main className="min-h-screen bg-gray-50">
+                {children}
+              </main>
+
               {!hideFooter && <Footer />}
             </ToastProvider>
           </ClientProviders>
