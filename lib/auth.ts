@@ -8,29 +8,38 @@ export async function signUp(
   email: string,
   password: string,
   fullName: string,
-  role: string,
+  role: string
 ) {
   const supabase = createServerActionClient({ cookies });
 
-  // Create user in Supabase Auth
+  // 1️⃣ Create user in Supabase Auth
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
   });
 
-  if (error) throw error;
-
-  // Insert into profiles table
-  if (data.user) {
-    const { error: profileErr } = await supabase.from("profiles").insert([
-      {
-        id: data.user.id,
-        full_name: fullName,
-        role,
-      },
-    ]);
-    if (profileErr) throw profileErr;
+  if (error) {
+    throw new Error(error.message);
   }
 
+  // 2️⃣ Insert / update profile safely
+  if (data?.user) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert(
+        {
+          id: data.user.id,
+          full_name: fullName,
+          role,
+        },
+        { onConflict: "id" }
+      );
+
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+  }
+
+  // 3️⃣ Return created user
   return data.user;
 }
