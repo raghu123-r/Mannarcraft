@@ -34,7 +34,7 @@ type SubCategory = {
   };
 };
 
-/* ---------------- PAGE CONTENT ---------------- */
+/* ---------------- PAGE/CONTENT ---------------- */
 
 function CategoriesPageContent() {
   const router = useRouter();
