@@ -24,7 +24,7 @@ const nextConfig = {
   rewrites: async () => [
     {
       source: '/api/:path*',
-      destination: 'http://localhost:5001/h*',
+      destination: 'http://localhost:5001/api/:path*',
     },
   ],
 
@@ -50,18 +50,17 @@ const nextConfig = {
         pathname: "/**",
       },
 
-      // ✅ Bing domains
+      // ✅ Bing domains (removed tse4 - it's broken)
       { protocol: "https", hostname: "th.bing.com", pathname: "/**" },
       { protocol: "https", hostname: "www.bing.com", pathname: "/**" },
       { protocol: "https", hostname: "tse1.mm.bing.net", pathname: "/**" },
       { protocol: "https", hostname: "tse2.mm.bing.net", pathname: "/**" },
       { protocol: "https", hostname: "tse3.mm.bing.net", pathname: "/**" },
-      { protocol: "https", hostname: "tse4.mm.bing.net", pathname: "/**" },
 
       // ✅ Timothylangston
       { protocol: "https", hostname: "www.timothylangston.com", pathname: "/**" },
 
-      // ✅ Amazon images (CURRENT ERROR FIX)
+      // ✅ Amazon images
       { protocol: "https", hostname: "m.media-amazon.com", pathname: "/**" },
     ],
 
