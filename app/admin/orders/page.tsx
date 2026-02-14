@@ -1,6 +1,6 @@
 /**
  * Admin Orders Page - Redesigned
- * Modern order management with status badges, filters, and detail view
+ * Modern .gorder management with status badges, filters, and detail view
  */
 "use client";
 
