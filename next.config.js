@@ -30,7 +30,7 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-      // ✅ Supabase public storage
+      // ✅ Supabase public storage - specific hostname from env
       ...(supabaseHostname
         ? [
             {
@@ -42,6 +42,14 @@ const nextConfig = {
           ]
         : []),
 
+      // ✅ Supabase - wildcard pattern to catch all Supabase instances
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
+
       // ✅ Placeholder images
       {
         protocol: "https",
@@ -50,12 +58,17 @@ const nextConfig = {
         pathname: "/**",
       },
 
-      // ✅ Bing domains (removed tse4 - it's broken)
+      // ✅ Bing domains - Updated to allow all tse subdomains
       { protocol: "https", hostname: "th.bing.com", pathname: "/**" },
       { protocol: "https", hostname: "www.bing.com", pathname: "/**" },
       { protocol: "https", hostname: "tse1.mm.bing.net", pathname: "/**" },
       { protocol: "https", hostname: "tse2.mm.bing.net", pathname: "/**" },
       { protocol: "https", hostname: "tse3.mm.bing.net", pathname: "/**" },
+      { protocol: "https", hostname: "tse4.mm.bing.net", pathname: "/**" },
+      { protocol: "https", hostname: "tse5.mm.bing.net", pathname: "/**" },
+      { protocol: "https", hostname: "tse6.mm.bing.net", pathname: "/**" },
+      { protocol: "https", hostname: "tse7.mm.bing.net", pathname: "/**" },
+      { protocol: "https", hostname: "tse8.mm.bing.net", pathname: "/**" },
 
       // ✅ Timothylangston
       { protocol: "https", hostname: "www.timothylangston.com", pathname: "/**" },
