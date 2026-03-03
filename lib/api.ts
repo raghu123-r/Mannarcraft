@@ -31,6 +31,20 @@ export class ApiError extends Error {
   }
 }
 
+// -------------------- TOKEN HELPERS --------------------
+// ✅ These are imported by auth.api.ts — do not remove
+
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("adminToken") || localStorage.getItem("token");
+}
+
+export function clearStoredTokens(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("token");
+}
+
 // -------------------- ENVELOPE HANDLING --------------------
 export function unwrapEnvelope(body: any): any {
   if (!body || typeof body !== "object") return body;
@@ -40,7 +54,7 @@ export function unwrapEnvelope(body: any): any {
       throw new ApiError(
         body.error?.message || body.message || "Request failed",
         body.statusCode || 500,
-        body.error?.details
+        body.error?.details ?? body
       );
     }
     return body.data;
@@ -49,7 +63,10 @@ export function unwrapEnvelope(body: any): any {
   return body;
 }
 
-export function normalizeListResponse(payload: any, knownKeys: string[] = []): any[] {
+export function normalizeListResponse(
+  payload: any,
+  knownKeys: string[] = []
+): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
 
@@ -58,7 +75,15 @@ export function normalizeListResponse(payload: any, knownKeys: string[] = []): a
 
   if (Array.isArray(maybe)) return maybe;
 
-  const keys = [...knownKeys, "items", "list", "rows", "products", "categories", "brands"];
+  const keys = [
+    ...knownKeys,
+    "items",
+    "list",
+    "rows",
+    "products",
+    "categories",
+    "brands",
+  ];
   for (const k of keys) {
     if (Array.isArray(maybe?.[k])) return maybe[k];
   }
@@ -66,7 +91,10 @@ export function normalizeListResponse(payload: any, knownKeys: string[] = []): a
   return [];
 }
 
-export function ensureArray(payload: any, knownKeys: string[] = ["items", "data"]) {
+export function ensureArray(
+  payload: any,
+  knownKeys: string[] = ["items", "data"]
+) {
   return normalizeListResponse(payload, knownKeys);
 }
 
@@ -76,10 +104,7 @@ export async function apiFetch<T = any>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = buildUrl(path);
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("adminToken") || localStorage.getItem("token")
-      : null;
+  const token = getStoredToken();
 
   try {
     const res = await fetch(url, {
@@ -99,24 +124,33 @@ export async function apiFetch<T = any>(
     try {
       body = text ? JSON.parse(text) : null;
     } catch {
-      // If not JSON, treat as plain text error
       body = { message: text || res.statusText };
     }
 
+    // ── Envelope response: { success, statusCode, data, error } ──
     if (body && (body.success !== undefined || body.statusCode !== undefined)) {
       if (!body.success) {
+        // 401 inside envelope → clear stale tokens
+        if ((body.statusCode || res.status) === 401) {
+          clearStoredTokens();
+        }
         throw new ApiError(
           body.error?.message || body.message || "Request failed",
           body.statusCode || res.status,
-          body.error?.details
+          body.error?.details ?? body
         );
       }
       return body.data as T;
     }
 
+    // ── Non-envelope: fall back to HTTP status ──
     if (!res.ok) {
+      // 401 → clear stale tokens so retries stop
+      if (res.status === 401) {
+        clearStoredTokens();
+      }
       throw new ApiError(
-        body?.message || res.statusText,
+        body?.message || body?.error || res.statusText,
         res.status,
         body
       );
@@ -124,8 +158,10 @@ export async function apiFetch<T = any>(
 
     return body as T;
   } catch (err: any) {
-    console.error("❌ apiFetch network error:", err);
+    // ✅ Re-throw ApiErrors as-is — never wrap them in a network error
+    if (err instanceof ApiError) throw err;
 
+    console.error("❌ apiFetch network error:", err);
     throw new ApiError(
       err?.message || "Network error (CORS / server unreachable)",
       0,

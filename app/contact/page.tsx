@@ -17,7 +17,7 @@ export default function ContactPage() {
   // ⭐ Static Contact Info (matching Footer)
   const contactData = {
     phone: "+91 8989889880",
-    email: "saleskitchenkettles@gmail.com",
+    email: "salesmannarcraft@gmail.com",
     address: "Ground Floor & First Floor, No. 305, Shop No. 9,\nVarthur Main Road, Opp. Shani Mahatma Temple,\nGunjur, Bengaluru – 560087",
   };
 

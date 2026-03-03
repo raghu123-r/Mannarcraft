@@ -5,6 +5,6 @@ export async function fetchSubCategories(params?: {
   homepage?: boolean;
 }) {
   const qs = params ? buildQueryString(params) : "";
-  const res = await apiGet(`/api/subcategories${qs}`);
+  const res = await apiGet(`/subcategories${qs}`);
   return ensureArray(res);
 }
