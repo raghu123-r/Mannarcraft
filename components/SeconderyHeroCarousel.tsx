@@ -10,7 +10,7 @@ import Link from "next/link";
 
 const slides = [
   {
-    image: "/assets/hero/hero1.jpg",
+    image: "/assets/hero/hero2.jpg",
     title: "Bring The Taste Of Heritage",
     subtitle: "Back To Your Kitchen",
     description:

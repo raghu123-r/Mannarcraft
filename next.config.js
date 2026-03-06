@@ -29,6 +29,7 @@ const nextConfig = {
   ],
 
   images: {
+    unoptimized: true,
     remotePatterns: [
       // ✅ Supabase public storage - specific hostname from env
       ...(supabaseHostname

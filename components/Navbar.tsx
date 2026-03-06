@@ -8,7 +8,6 @@ import dynamic from "next/dynamic";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useCart } from "@/components/CartContext";
-import LogoImg from "@/assets/images/logo.png";
 import GlobalLoader from "@/components/common/GlobalLoader";
 
 const CartBadgeClient = dynamic(() => import("./CartBadgeClient"), { ssr: false });
@@ -79,8 +78,8 @@ export default function Navbar() {
           {/* LOGO */}
           <Link href="/" className="flex items-center flex-shrink-0">
             <Image
-              src={LogoImg}
-              alt="Kitchen Kettles"
+             src="/mnrcraft-logo.png"
+              alt="MNRCraft"
               width={160}
               height={50}
               className="h-12 w-auto object-contain"
