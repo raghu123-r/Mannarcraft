@@ -17,12 +17,11 @@ try {
     "Could not parse SUPABASE URL for next.config remotePatterns:",
     rawSupabaseUrl
   );
-  supabaseHostname = "";
 }
 
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true, // fixes Vercel ESLint build errors
+    ignoreDuringBuilds: true,
   },
 
   turbopack: {},
@@ -54,14 +53,12 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "*.supabase.co",
-        port: "",
         pathname: "/storage/v1/object/public/**",
       },
 
       {
         protocol: "https",
         hostname: "via.placeholder.com",
-        port: "",
         pathname: "/**",
       },
 
