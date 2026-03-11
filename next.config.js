@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 
 
-// ..Parse Supabase hostname from env for Next.js image remotePatterns
+// ...Parse Supabase hostname from env for Next.js image remotePatterns
 
  develop
 const { URL } = require("url");
