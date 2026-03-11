@@ -20,11 +20,11 @@ export default function Footer() {
             {/* Column 1 - Brand & Social */}
             <div className="text-left">
               <h2 className="text-sm font-semibold tracking-wider text-gray-200 uppercase mb-3">
-                KITCHEN KETTLES
+               MANNARCRAFT
               </h2>
               <span className="w-8 h-0.5 bg-emerald-400 block mb-4"></span>
               <p className="text-sm text-gray-300 mb-4">
-                Your trusted partner for premium kitchen solutions.
+                Your trusted partner for premium mannarcraft solutions.
               </p>
               <div className="flex gap-3 mt-2">
                 <a
@@ -37,10 +37,10 @@ export default function Footer() {
                   <FaFacebookF className="text-base text-[#1a1a1a] hover:text-[#3EB489] transition-colors duration-200" />
                 </a>
                 <a
-                  href="https://www.instagram.com/kitchen_kettles/"
+                  href="https://www.instagram.com/Mannarcraft/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Kitchen Kettles Instagram"
+                  aria-label="Mannarcraft Instagram"
                   className="p-2 bg-white border border-gray-200 rounded-full hover:bg-emerald-600 hover:text-white transition"
                 >
                   <FaInstagram className="text-base text-[#1a1a1a] hover:text-[#3EB489] transition-colors duration-200" />
@@ -125,10 +125,10 @@ export default function Footer() {
                 <p className="flex items-center gap-2">
                   <FaEnvelope className="text-emerald-400" />
                   <a
-                    href="mailto:saleskitchenkettles@gmail.com"
+                    href="mailto:salesMannarcraft@gmail.com"
                     className="hover:text-emerald-400 transition break-all"
                   >
-                    saleskitchenkettles@gmail.com
+                    salesmannarcraft@gmail.com
                   </a>
                 </p>
               </div>

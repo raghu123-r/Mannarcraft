@@ -15,7 +15,6 @@ export default function SecondaryNavbar() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -33,7 +32,7 @@ export default function SecondaryNavbar() {
   return (
     <div className="relative bg-[#f5b335] border-b">
       <div className="max-w-7xl mx-auto flex items-center gap-8 px-4 py-3">
-        
+
         {/* MAIN CATEGORIES BUTTON */}
         <button
           onClick={() => setOpen(!open)}
@@ -53,7 +52,6 @@ export default function SecondaryNavbar() {
               {cat.name}
             </Link>
           ))}
-          <Link href="/blog">Blog</Link>
         </nav>
       </div>
 
@@ -72,7 +70,7 @@ export default function SecondaryNavbar() {
                   className="flex justify-between items-center px-5 py-3 hover:bg-gray-100"
                 >
                   <span>{cat.name}</span>
-                  <span className="text-black bg-black text-white px-2 py-1 rounded">
+                  <span className="bg-black text-white px-2 py-1 rounded">
                     →
                   </span>
                 </Link>

@@ -8,13 +8,15 @@ const testimonials = [
     name: "SHINE JOSE",
     role: "Business owner",
     text: "Wonderful Aranmula Kannadi from Mannar Craft—great service, custom care, superb quality, careful packing, fast delivery. Highly recommended. Yes!",
-    avatar: "/avatars/shine.jpg",
+    initial: "S",
+    color: "bg-blue-600",
   },
   {
     name: "NANDINI NAIR",
     role: "House wife",
     text: "Found Mannar Craft while searching for ottu uruli; loved the variety. Ordered uruli and nilavilakku; arrived in 7 days, well packed. Very happy :)",
-    avatar: "/avatars/nandini.jpg",
+    initial: "N",
+    color: "bg-pink-600",
   },
   {
     name: "shidhi P.R",
@@ -71,19 +73,11 @@ export default function HomeTestimonials() {
               className="bg-[#f3f3f3] rounded-xl p-6 w-[320px] shadow-md"
             >
               <div className="flex items-center gap-4 mb-4">
-                {t.avatar ? (
-                  <img
-                    src={t.avatar}
-                    className="w-14 h-14 rounded-full object-cover"
-                    alt={t.name}
-                  />
-                ) : (
-                  <div
-                    className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold ${t.color}`}
-                  >
-                    {t.initial}
-                  </div>
-                )}
+                <div
+                  className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl ${t.color}`}
+                >
+                  {t.initial}
+                </div>
               </div>
 
               <p className="text-gray-700 text-sm leading-relaxed mb-4">

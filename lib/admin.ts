@@ -2,15 +2,13 @@
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? "https://kk-backend-5c11.onrender.com/api";
 
-// Enhanced auth wrappers with better error handling and credential management
-// Unwraps backend envelope format: { statusCode, success, error, data }
 async function apiFetchAuth(path: string, opts: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const headers = { ...(opts.headers || {}), 'Content-Type': 'application/json' } as Record<string, string>;
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${path}`, {
-    credentials: 'include',      // CRITICAL: sends HttpOnly adminToken cookie
+    credentials: 'include',
     headers,
     ...opts,
   });
@@ -18,7 +16,6 @@ async function apiFetchAuth(path: string, opts: RequestInit = {}) {
   const status = res.status;
   const json = await res.json().catch(() => null);
   
-  // Accept any 2xx status as success (200, 201, etc.)
   const isSuccess = status >= 200 && status < 300;
   
   if (!isSuccess) {
@@ -27,16 +24,13 @@ async function apiFetchAuth(path: string, opts: RequestInit = {}) {
     throw err;
   }
   
-  // Unwrap backend envelope: { statusCode, success, error, data }
   if (json && typeof json === 'object' && ('statusCode' in json || 'success' in json)) {
-    // Backend envelope detected
     if (json.success === false) {
       const errMsg = json.error?.message || json.message || 'Request failed';
       const err = new Error(errMsg);
       (err as any).status = json.statusCode || status;
       throw err;
     }
-    // Return the data directly (may be array or object)
     if (json.data !== undefined) {
       return json.data;
     }
@@ -52,22 +46,16 @@ export function apiPutAuth(path: string, data?: any) { return apiFetchAuth(path,
 export function apiPatchAuth(path: string, data?: any) { return apiFetchAuth(path, { method: 'PATCH', body: JSON.stringify(data) }); }
 export function apiDeleteAuth(path: string) { return apiFetchAuth(path, { method: 'DELETE' }); }
 
-/**
- * Ensure any payload becomes an array
- * Checks known keys: items, data, products, categories, brands
- */
 function ensureArray(payload: any, knownKeys: string[] = ['items', 'data', 'products', 'categories', 'brands']): any[] {
   if (!payload) return [];
   if (Array.isArray(payload)) return payload;
   
-  // Check known keys for array data
   for (const key of knownKeys) {
     if (Array.isArray(payload[key])) {
       return payload[key];
     }
   }
   
-  // If payload has data property that's an array
   if (payload.data && Array.isArray(payload.data)) {
     return payload.data;
   }
@@ -79,7 +67,7 @@ async function callLogin(url: string, body: any) {
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // ✅ Enable cookie storage
+    credentials: "include",
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -109,14 +97,11 @@ export async function adminLogin(email: string, password: string) {
 
 export async function adminLogout() {
   try {
-    // Call backend to clear cookies
     await apiPostAuth("/admin/logout", {});
   } catch (e) {
-    // Continue with client-side cleanup even if backend fails
     console.warn('Backend logout failed:', e);
   }
   
-  // Clear all admin tokens and session data from localStorage
   if (typeof window !== 'undefined') {
     const keysToRemove = [
       'adminToken', 'admin_token', 'adminUser',
@@ -132,14 +117,12 @@ export async function adminLogout() {
       }
     });
 
-    // Clear cookies
     const cookieNames = ['adminToken', 'accessToken', 'token'];
     cookieNames.forEach(name => {
       document.cookie = `${name}=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
       document.cookie = `${name}=; path=/admin; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
     });
 
-    // Force navigation to login
     window.location.href = '/admin/login';
   }
 }
@@ -154,43 +137,27 @@ export async function getAdminProducts(params?: {
   priceMin?: string;
   priceMax?: string;
 }) {
-  // For backward compatibility: if no params, request a very high limit to get all products
   const effectiveParams = params || { page: 1, limit: 9999 };
   
-  // Build query parameters
   const queryParams: Record<string, string> = {
     page: String(effectiveParams.page || 1),
     limit: String(effectiveParams.limit || 9999)
   };
   
-  // Add filter parameters if provided
-  if (effectiveParams.search) {
-    queryParams.search = effectiveParams.search;
-  }
-  if (effectiveParams.category) {
-    queryParams.category = effectiveParams.category;
-  }
-  if (effectiveParams.brand) {
-    queryParams.brand = effectiveParams.brand;
-  }
-  if (effectiveParams.priceMin) {
-    queryParams.priceMin = effectiveParams.priceMin;
-  }
-  if (effectiveParams.priceMax) {
-    queryParams.priceMax = effectiveParams.priceMax;
-  }
+  if (effectiveParams.search) queryParams.search = effectiveParams.search;
+  if (effectiveParams.category) queryParams.category = effectiveParams.category;
+  if (effectiveParams.brand) queryParams.brand = effectiveParams.brand;
+  if (effectiveParams.priceMin) queryParams.priceMin = effectiveParams.priceMin;
+  if (effectiveParams.priceMax) queryParams.priceMax = effectiveParams.priceMax;
   
   const queryString = '?' + new URLSearchParams(queryParams).toString();
   
   const data = await apiGetAuth(`/admin/products${queryString}`);
   
-  // If no params provided (backward compatibility), extract products array
   if (!params) {
     return ensureArray(data?.products || data, ['items', 'products', 'data']);
   }
   
-  // Backend now returns: { products, total, page, totalPages, limit, hasNextPage, hasPrevPage }
-  // Return the full response for pagination info
   return data;
 }
 
@@ -201,7 +168,6 @@ export function getSingleProduct(id: string) {
 export async function createProduct(data: any) {
   try {
     const result = await apiPostAuth("/admin/products", data);
-    // Handle different response structures defensively
     const product = result?.product ?? result?.data?.product ?? result?.data ?? null;
     return {
       ok: true,
@@ -243,7 +209,6 @@ export async function getBrands() {
   }
   const json = await res.json();
   
-  // Unwrap envelope if present
   const data = (json && (json.statusCode !== undefined || json.success !== undefined)) 
     ? (json.data ?? json) 
     : json;
@@ -257,34 +222,24 @@ export async function getAdminBrands(params?: {
   search?: string;
   status?: string;
 }) {
-  // For backward compatibility: if no params, request a very high limit to get all brands
   const effectiveParams = params || { page: 1, limit: 9999 };
   
-  // Build query parameters
   const queryParams: Record<string, string> = {
     page: String(effectiveParams.page || 1),
     limit: String(effectiveParams.limit || 9999)
   };
   
-  // Add filter parameters if provided
-  if (effectiveParams.search) {
-    queryParams.search = effectiveParams.search;
-  }
-  if (effectiveParams.status) {
-    queryParams.status = effectiveParams.status;
-  }
+  if (effectiveParams.search) queryParams.search = effectiveParams.search;
+  if (effectiveParams.status) queryParams.status = effectiveParams.status;
   
   const queryString = '?' + new URLSearchParams(queryParams).toString();
   
   const data = await apiGetAuth(`/brands/all${queryString}`);
   
-  // If no params provided (backward compatibility), extract brands array
   if (!params) {
     return ensureArray(data?.brands || data, ['items', 'brands', 'data']);
   }
   
-  // Backend now returns: { brands, total, page, totalPages, limit, hasNextPage, hasPrevPage }
-  // Return the full response for pagination info
   return data;
 }
 
@@ -322,7 +277,6 @@ export async function getCategories() {
   }
   const json = await res.json();
   
-  // Unwrap envelope if present
   const data = (json && (json.statusCode !== undefined || json.success !== undefined)) 
     ? (json.data ?? json) 
     : json;
@@ -336,34 +290,24 @@ export async function getAdminCategories(params?: {
   search?: string;
   status?: string;
 }) {
-  // For backward compatibility: if no params, request a very high limit to get all categories
   const effectiveParams = params || { page: 1, limit: 9999 };
   
-  // Build query parameters
   const queryParams: Record<string, string> = {
     page: String(effectiveParams.page || 1),
     limit: String(effectiveParams.limit || 9999)
   };
   
-  // Add filter parameters if provided
-  if (effectiveParams.search) {
-    queryParams.search = effectiveParams.search;
-  }
-  if (effectiveParams.status) {
-    queryParams.status = effectiveParams.status;
-  }
+  if (effectiveParams.search) queryParams.search = effectiveParams.search;
+  if (effectiveParams.status) queryParams.status = effectiveParams.status;
   
   const queryString = '?' + new URLSearchParams(queryParams).toString();
   
   const data = await apiGetAuth(`/categories/all${queryString}`);
   
-  // If no params provided (backward compatibility), extract categories array
   if (!params) {
     return ensureArray(data?.categories || data, ['items', 'categories', 'data']);
   }
   
-  // Backend now returns: { categories, total, page, totalPages, limit, hasNextPage, hasPrevPage }
-  // Return the full response for pagination info
   return data;
 }
 
@@ -395,8 +339,8 @@ export function enableCategory(id: string) {
 export async function getAdminContactSubmissions(params?: { page?: number; limit?: number }) {
   const page = params?.page || 1;
   const limit = params?.limit || 10;
+  // FIXED: changed from /contact to /admin/contact-submissions (matches backend route)
   const data = await apiGetAuth(`/admin/contact-submissions?page=${page}&limit=${limit}`);
-  // Return the full response with pagination info
   return data;
 }
 
@@ -425,7 +369,7 @@ export async function searchProductsForTopPicks(search: string = '', limit: numb
   return ensureArray(data, ['items', 'products', 'data']);
 }
 
-export async function browseProductsForTopPicks(page: number = 1, limit: number = 10) {
+export async function browseProductsForTopPicks(page: number = 1, limit: number = 20) {
   const data = await apiGetAuth(`/admin/homepage/products-search?browse=true&page=${page}&limit=${limit}`);
   return {
     products: ensureArray(data, ['items', 'products', 'data']),

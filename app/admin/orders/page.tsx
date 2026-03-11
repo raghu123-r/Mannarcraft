@@ -1,12 +1,12 @@
 /**
  * Admin Orders Page - Redesigned
- * Modern order management with status badges, filters, and detail view
+ * Modern .gorder management with status badges, filters, and detail view
  */
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { apiGetAuth } from "@/lib/api";
+import { fetchWithAuth } from "@/lib/api/orders.api";
 import Link from "next/link";
 import { Eye, Package, Calendar, User, CreditCard, Truck, X } from "lucide-react";
 
@@ -65,7 +65,7 @@ export default function AdminOrdersPage() {
         if (searchTerm) params.set("search", searchTerm);
         if (statusFilter) params.set("status", statusFilter);
 
-        const res = await apiGetAuth(`/admin/orders?${params.toString()}`);
+        const res = await fetchWithAuth(`/admin/orders?${params.toString()}`);
         
         // Handle response format from backend
         const ordersList =
@@ -103,7 +103,7 @@ export default function AdminOrdersPage() {
 
   async function loadReturnRequests() {
     try {
-      const res = await apiGetAuth("/admin/returns");
+      const res = await fetchWithAuth("/admin/returns");
       const returns = res?.returnRequests || [];
       
       const grouped: Record<string, ReturnRequest[]> = {};
