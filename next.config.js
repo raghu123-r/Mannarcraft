@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 
-// Parse Supabase hostname from env for Next.js image remotePatterns
+// .Parse Supabase hostname from env for Next.js image remotePatterns
 const { URL } = require("url");
 const rawSupabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "";
