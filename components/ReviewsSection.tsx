@@ -31,19 +31,17 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
   // Load initial reviews (page 1) when component mounts
   useEffect(() => {
     if (!productId) return;
-    
+
     const fetchInitialReviews = async () => {
       setLoading(true);
       try {
         const data = await getProductReviews(productId, 1);
-        // Ensure reviews is always an array
         setReviews(Array.isArray(data.reviews) ? data.reviews : []);
         setTotalReviews(data.totalReviews || 0);
         setCurrentPage(data.currentPage || 1);
         setHasNextPage(data.hasNextPage || false);
       } catch (err) {
         console.error("Failed to load reviews:", err);
-        // Set to empty array on error
         setReviews([]);
         setTotalReviews(0);
         setHasNextPage(false);
@@ -63,7 +61,6 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
     try {
       const nextPage = currentPage + 1;
       const data = await getProductReviews(productId, nextPage);
-      // Ensure we're always working with arrays
       const newReviews = Array.isArray(data.reviews) ? data.reviews : [];
       setReviews([...reviews, ...newReviews]);
       setCurrentPage(data.currentPage || nextPage);
@@ -75,24 +72,26 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
     }
   };
 
-  // Calculate average rating from total reviews - Safe array handling
-  const averageRating = Array.isArray(reviews) && reviews.length > 0
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
-    : 0;
+  // Calculate average rating
+  const averageRating =
+    Array.isArray(reviews) && reviews.length > 0
+      ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+      : 0;
 
-  // Calculate rating distribution - Safe array handling
-  const ratingDistribution = [5, 4, 3, 2, 1].map(star => ({
+  // Calculate rating distribution
+  const ratingDistribution = [5, 4, 3, 2, 1].map((star) => ({
     star,
-    count: Array.isArray(reviews) ? reviews.filter(r => r.rating === star).length : 0,
-    percentage: Array.isArray(reviews) && reviews.length > 0 
-      ? (reviews.filter(r => r.rating === star).length / reviews.length) * 100 
-      : 0
+    count: Array.isArray(reviews) ? reviews.filter((r) => r.rating === star).length : 0,
+    percentage:
+      Array.isArray(reviews) && reviews.length > 0
+        ? (reviews.filter((r) => r.rating === star).length / reviews.length) * 100
+        : 0,
   }));
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim() || !comment.trim()) {
       setError("Please fill in all fields");
       return;
@@ -106,20 +105,17 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
         productId,
         name: name.trim(),
         rating,
-        comment: comment.trim()
+        comment: comment.trim(),
       });
 
-      // Add new review to the top of the list - Safe array handling
       const currentReviews = Array.isArray(reviews) ? reviews : [];
       setReviews([newReview, ...currentReviews]);
       setTotalReviews(totalReviews + 1);
 
-      // Reset form
       setName("");
       setRating(5);
       setComment("");
-      
-      // Show success message briefly
+
       setError("Review submitted successfully!");
       setTimeout(() => setError(null), 3000);
     } catch (err) {
@@ -194,7 +190,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                       />
                     </div>
                     <span className="text-xs font-medium text-gray-500 w-12 text-right">
-                      {count} {count === 1 ? 'review' : 'reviews'}
+                      {count} {count === 1 ? "review" : "reviews"}
                     </span>
                   </div>
                 ))}
@@ -215,11 +211,14 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                 <h3 className="text-lg font-bold">Write a Review</h3>
               </div>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               {/* Name Input */}
               <div>
-                <label htmlFor="name" className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2"
+                >
                   Your Name
                 </label>
                 <input
@@ -268,7 +267,10 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
 
               {/* Comment Textarea */}
               <div>
-                <label htmlFor="comment" className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">
+                <label
+                  htmlFor="comment"
+                  className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2"
+                >
                   Your Review
                 </label>
                 <textarea
@@ -283,9 +285,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                 />
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-gray-500">Be specific and honest</span>
-                  <span className="text-xs font-medium text-gray-500">
-                    {comment.length}/1000
-                  </span>
+                  <span className="text-xs font-medium text-gray-500">{comment.length}/1000</span>
                 </div>
               </div>
 
@@ -341,7 +341,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                   Showing {reviews.length} of {totalReviews}
                 </span>
               </div>
-              
+
               <div className="space-y-4">
                 {reviews.map((review, index) => (
                   <div
@@ -353,8 +353,11 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                              {review.name.charAt(0).toUpperCase()}
+                            {/* ✅ FIXED: Pure letter avatar — no image, no broken icon */}
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-md flex-shrink-0 select-none">
+                              {review.name
+                                ? review.name.trim().charAt(0).toUpperCase()
+                                : "?"}
                             </div>
                             <div>
                               <h4 className="font-bold text-gray-900 text-base">{review.name}</h4>
@@ -362,7 +365,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                                 {new Date(review.createdAt).toLocaleDateString("en-US", {
                                   year: "numeric",
                                   month: "short",
-                                  day: "numeric"
+                                  day: "numeric",
                                 })}
                               </p>
                             </div>
@@ -391,8 +394,8 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                         </p>
                       </div>
                     </div>
-                    
-                    {/* Verified Badge (Optional Enhancement) */}
+
+                    {/* Most Recent Badge */}
                     {index === 0 && (
                       <div className="bg-gradient-to-r from-emerald-50 to-emerald-100/50 px-6 py-2 border-t border-emerald-200">
                         <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
@@ -404,7 +407,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                   </div>
                 ))}
               </div>
-              
+
               {/* Load More Button */}
               {hasNextPage && (
                 <div className="flex justify-center pt-4">

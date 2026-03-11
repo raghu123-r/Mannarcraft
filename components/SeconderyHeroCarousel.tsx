@@ -10,7 +10,7 @@ import Link from "next/link";
 
 const slides = [
   {
-    image: "/assets/hero/hero2.jpg",
+    image: "/assets/hero/hero1.jpg",
     title: "Bring The Taste Of Heritage",
     subtitle: "Back To Your Kitchen",
     description:
@@ -31,7 +31,6 @@ const slides = [
 
 export default function HeroCarousel() {
   return (
-    // ✅ FORCE HEIGHT HERE
     <section className="w-full h-[520px]">
       <Swiper
         modules={[Autoplay, EffectFade]}
@@ -41,7 +40,6 @@ export default function HeroCarousel() {
         className="h-full w-full"
       >
         {slides.map((slide, index) => (
-          // ✅ FORCE HEIGHT ON SLIDE
           <SwiperSlide key={index} className="h-full">
             <div className="grid grid-cols-1 md:grid-cols-2 h-full">
 
