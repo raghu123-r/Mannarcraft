@@ -1,12 +1,12 @@
 /**
  * Admin Orders Page - Redesigned
- * Modern .gorder management with status badges, filters, and detail view
+ * Modern order management with status badges, filters, and detail view
  */
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { fetchWithAuth } from "@/lib/api/orders.api";
+import { apiFetch } from "@/lib/api";
 import Link from "next/link";
 import { Eye, Package, Calendar, User, CreditCard, Truck, X } from "lucide-react";
 
@@ -65,8 +65,8 @@ export default function AdminOrdersPage() {
         if (searchTerm) params.set("search", searchTerm);
         if (statusFilter) params.set("status", statusFilter);
 
-        const res = await fetchWithAuth(`/admin/orders?${params.toString()}`);
-        
+        const res = await apiFetch(`/admin/orders?${params.toString()}`);
+
         // Handle response format from backend
         const ordersList =
           Array.isArray(res) ? res :
@@ -74,9 +74,9 @@ export default function AdminOrdersPage() {
           Array.isArray(res?.items) ? res.items :
           Array.isArray(res?.data) ? res.data :
           [];
-        
+
         setOrders(ordersList);
-        
+
         // Set pagination info from meta
         if (res?.meta) {
           setPaginationInfo({
@@ -103,9 +103,9 @@ export default function AdminOrdersPage() {
 
   async function loadReturnRequests() {
     try {
-      const res = await fetchWithAuth("/admin/returns");
+      const res = await apiFetch("/admin/returns");
       const returns = res?.returnRequests || [];
-      
+
       const grouped: Record<string, ReturnRequest[]> = {};
       returns.forEach((ret: ReturnRequest) => {
         const orderId = typeof ret.productId === 'object' ? ret.productId._id : ret.productId;
@@ -114,7 +114,7 @@ export default function AdminOrdersPage() {
         }
         grouped[orderId].push(ret);
       });
-      
+
       setReturnRequests(grouped);
     } catch (err) {
       console.error("Failed to load return requests", err);
@@ -157,11 +157,10 @@ export default function AdminOrdersPage() {
   };
 
   // Use orders directly (filtering is done server-side now)
-  const filteredOrders = orders
-    .sort(
-      (a: any, b: any) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  const filteredOrders = orders.sort(
+    (a: any, b: any) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -175,10 +174,10 @@ export default function AdminOrdersPage() {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
       currency: 'INR',
-      maximumFractionDigits: 0 
+      maximumFractionDigits: 0
     }).format(price || 0);
   };
 
@@ -243,8 +242,8 @@ export default function AdminOrdersPage() {
             {hasReturns && (
               <div className="flex flex-wrap gap-1">
                 {orderReturns.slice(0, 2).map((ret: ReturnRequest) => (
-                  <ReturnStatusBadge 
-                    key={ret._id} 
+                  <ReturnStatusBadge
+                    key={ret._id}
                     status={ret.status}
                     size="sm"
                   />
@@ -275,10 +274,10 @@ export default function AdminOrdersPage() {
       className: "w-[80px]",
       render: (order: any) => (
         <TableActionMenu>
-          <TableActionButton 
-            onClick={() => setSelectedOrder(order)} 
-            icon={<Eye className="w-4 h-4" />} 
-            label="View Details" 
+          <TableActionButton
+            onClick={() => setSelectedOrder(order)}
+            icon={<Eye className="w-4 h-4" />}
+            label="View Details"
           />
         </TableActionMenu>
       ),
@@ -315,7 +314,7 @@ export default function AdminOrdersPage() {
           { label: "Shipped", value: orderStats.shipped, color: "bg-purple-50 text-purple-700" },
           { label: "Delivered", value: orderStats.delivered, color: "bg-emerald-50 text-emerald-700" },
         ].map((stat) => (
-          <div 
+          <div
             key={stat.label}
             className={`${stat.color} rounded-xl p-3 sm:p-4 text-center`}
           >
@@ -442,7 +441,7 @@ export default function AdminOrdersPage() {
               <h4 className="font-medium text-slate-900 mb-3">Order Items</h4>
               <div className="space-y-3">
                 {selectedOrder.items?.map((item: any, index: number) => (
-                  <div 
+                  <div
                     key={index}
                     className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg"
                   >
