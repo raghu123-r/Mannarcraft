@@ -1,6 +1,5 @@
 "use client";
 
-import "./globals.css";
 import Navbar from "@/components/Navbar";
 import SecondaryNavbar from "@/components/SecondaryNavbar";
 import Footer from "@/components/Footer";
@@ -10,49 +9,37 @@ import { ToastProvider } from "@/components/ToastContext";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-export default function RootLayout({
+export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
 
-  const hideFooter =
-    pathname.startsWith("/admin") || pathname.startsWith("/account");
-
-  const hideNavbar =
-    pathname.startsWith("/admin") || pathname.startsWith("/account");
-
-  const hideSecondaryNavbar =
+  const hideLayout =
     pathname.startsWith("/admin") || pathname.startsWith("/account");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      window.scrollTo({ top: 0, left: 0 });
     }
   }, [pathname]);
 
   return (
-    <html lang="en">
-      <body>
-        <CartProvider>
-          <ClientProviders>
-            <ToastProvider>
-              {/* MAIN NAVBAR */}
-              {!hideNavbar && <Navbar />}
+    <CartProvider>
+      <ClientProviders>
+        <ToastProvider>
+          {!hideLayout && <Navbar />}
 
-              {/* SECONDARY CATEGORY NAVBAR */}
-              {!hideSecondaryNavbar && <SecondaryNavbar />}
+          {!hideLayout && <SecondaryNavbar />}
 
-              <main className="min-h-screen bg-gray-50">
-                {children}
-              </main>
+          <main className="min-h-screen bg-gray-50">
+            {children}
+          </main>
 
-              {!hideFooter && <Footer />}
-            </ToastProvider>
-          </ClientProviders>
-        </CartProvider>
-      </body>
-    </html>
+          {!hideLayout && <Footer />}
+        </ToastProvider>
+      </ClientProviders>
+    </CartProvider>
   );
 }
