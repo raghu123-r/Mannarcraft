@@ -17,19 +17,26 @@ try {
 
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,  // ✅ fixes Vercel ESLint build errors
+    ignoreDuringBuilds: true,
   },
 
   turbopack: {},
 
   experimental: {},
 
-  rewrites: async () => [
-    {
-      source: '/api/:path*',
-      destination: 'http://localhost:5001/api/:path*',
-    },
-  ],
+  // ✅ FIXED: rewrites now use env variable instead of localhost
+  // On Vercel: set NEXT_PUBLIC_API_URL = https://your-backend.onrender.com
+  // On localhost: set NEXT_PUBLIC_API_URL = http://localhost:5001
+  ...(process.env.NEXT_PUBLIC_API_URL
+    ? {
+        rewrites: async () => [
+          {
+            source: "/api/:path*",
+            destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
+          },
+        ],
+      }
+    : {}),
 
   images: {
     unoptimized: true,
