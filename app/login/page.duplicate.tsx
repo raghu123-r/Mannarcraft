@@ -31,7 +31,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
         <h1 className="text-2xl font-semibold text-gray-800 text-center mb-6">
-          Welcome to <span className="text-blue-600">Kitchen Kettles</span>
+          Welcome to <span className="text-blue-600">MannarCraft</span>
         </h1>
 
         {error && <p className="text-red-500 text-center mb-3">{error}</p>}
