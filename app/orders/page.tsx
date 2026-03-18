@@ -136,7 +136,7 @@ export default function OrdersPage() {
               Check backend status:
             </p>
             <code className="block bg-slate-900 text-slate-100 p-3 rounded text-sm overflow-x-auto">
-              curl -i https://kk-backend-5c11.onrender.com/api
+              curl -i https://mk-backend-a6c7.onrender.com/api
             </code>
             <p className="text-xs text-slate-500 mt-2">
               Expected: HTTP 200 response. If you get a connection error, start
@@ -157,7 +157,7 @@ export default function OrdersPage() {
 
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => window.open("https://kk-backend-5c11.onrender.com/api", "_blank")}
+              onClick={() => window.open("https://mk-backend-a6c7.onrender.com/api", "_blank")}
               className="bg-slate-600 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-lg transition"
             >
               Check Backend

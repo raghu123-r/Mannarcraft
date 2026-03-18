@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL || "https://kk-backend-5c11.onrender.com/api";
+const BACKEND_URL = process.env.BACKEND_URL || "https://mk-backend-a6c7.onrender.com/api";
 
 export async function POST(req: Request) {
   try {

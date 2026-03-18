@@ -33,7 +33,7 @@ export default function VariantManager({ productId }: VariantManagerProps) {
   });
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://kk-backend-5c11.onrender.com/api';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://mk-backend-a6c7.onrender.com/api';
 
   useEffect(() => {
     loadVariants();
