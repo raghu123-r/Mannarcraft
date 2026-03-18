@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { buildUrl } from "@/lib/api";
-
 interface HeroImage {
   _id: string;
   title: string;
