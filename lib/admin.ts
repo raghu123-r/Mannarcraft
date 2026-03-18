@@ -1,6 +1,6 @@
 // -------------------- AUTH --------------------
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://kk-backend-5c11.onrender.com/api";
+  process.env.NEXT_PUBLIC_API_URL ?? "https://mk-backend-a6c7.onrender.com/api";
 
 async function apiFetchAuth(path: string, opts: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;

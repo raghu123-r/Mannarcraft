@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "Premium brass and traditional cookware",
 };
 
-export default function RootLayout({
+export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;

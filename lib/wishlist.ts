@@ -1,6 +1,6 @@
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://kk-backend-5c11.onrender.com/api";
+  "https://mk-backend-a6c7.onrender.com/api";
 
 export async function toggleWishlist(productId: string) {
   const token =

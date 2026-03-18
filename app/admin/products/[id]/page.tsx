@@ -67,7 +67,7 @@ export default function EditProductPage() {
           getBrands(),
           getCategories(),
           // Fetch variants
-          fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'https://kk-backend-5c11.onrender.com/api'}/admin/products/${productId}/variants`, {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'https://mk-backend-a6c7.onrender.com/api'}/admin/products/${productId}/variants`, {
             headers: {
               'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('adminToken') : ''}`,
             }

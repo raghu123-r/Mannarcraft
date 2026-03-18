@@ -102,7 +102,7 @@ export default function ProductCard({ product }: any) {
       // Fetch variants
       setLoadingVariants(true);
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://kk-backend-5c11.onrender.com/api';
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'https://mk-backend-a6c7.onrender.com/api';
         const res = await fetch(`${API_BASE}/products/${product.slug}/variants`);
         const data = await res.json();
         
