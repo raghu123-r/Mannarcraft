@@ -30,12 +30,12 @@ interface PaginationData {
   pages: number;
 }
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 20;
 
 function ProductsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,12 +56,12 @@ function ProductsPageContent() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        
+
         // Build query string with all filters
         const params = new URLSearchParams();
         params.set("page", currentPage.toString());
         params.set("limit", ITEMS_PER_PAGE.toString());
-        
+
         if (searchQuery) {
           params.set("q", searchQuery);
         }
@@ -71,22 +71,16 @@ function ProductsPageContent() {
         if (brandFilter) {
           params.set("brand", brandFilter);
         }
-        
+
         const data = await apiGet(`/api/products?${params.toString()}`);
-        
+
         // Handle both array response and object with items
         const items = Array.isArray(data) ? data : (data?.items ?? []);
         const total = Array.isArray(data) ? data.length : (data?.total ?? 0);
         const page = Array.isArray(data) ? 1 : (data?.page ?? 1);
         const pages = Array.isArray(data) ? 1 : (data?.pages ?? 1);
-        
-        setPaginationData({
-          items,
-          total,
-          page,
-          pages,
-        });
-        
+
+        setPaginationData({ items, total, page, pages });
         setProducts(items);
       } catch (err) {
         console.error("Failed to load products", err);
@@ -103,18 +97,17 @@ function ProductsPageContent() {
   // Handle page change
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > paginationData.pages) return;
-    
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
-    
+
     router.push(`/products?${params.toString()}`, { scroll: true });
   };
 
-  // Handle search with debounce
+  // Handle search
   const handleSearch = (value: string) => {
     setSearchQuery(value);
-    
-    // Reset to page 1 when searching
+
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", "1");
     if (value) {
@@ -122,7 +115,7 @@ function ProductsPageContent() {
     } else {
       params.delete("q");
     }
-    
+
     router.push(`/products?${params.toString()}`);
   };
 
@@ -132,31 +125,18 @@ function ProductsPageContent() {
     const { page: current, pages: total } = paginationData;
 
     if (total <= 7) {
-      // Show all pages if 7 or fewer
       for (let i = 1; i <= total; i++) {
         pages.push(i);
       }
     } else {
-      // Always show first page
       pages.push(1);
+      if (current > 3) pages.push("...");
 
-      if (current > 3) {
-        pages.push("...");
-      }
-
-      // Show current page and surrounding pages
       const start = Math.max(2, current - 1);
       const end = Math.min(total - 1, current + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
 
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      if (current < total - 2) {
-        pages.push("...");
-      }
-
-      // Always show last page
+      if (current < total - 2) pages.push("...");
       pages.push(total);
     }
 
@@ -175,9 +155,6 @@ function ProductsPageContent() {
       <section className="bg-gradient-to-br from-emerald-50 to-teal-50 py-12">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold text-slate-900 mb-4">All Products</h1>
-          {/* subtitle removed per design update */}
-
-          {/* Removed inner page search bar as per updated UI requirement */}
         </div>
       </section>
 
@@ -197,8 +174,8 @@ function ProductsPageContent() {
             </div>
           ) : (
             <>
-              {/* Products Grid */}
-              <div className="flex flex-col divide-y divide-gray-200 md:divide-y-0 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6">
+              {/* ✅ 5-column product grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {products.map((product) => (
                   <ProductCard key={product._id} product={product} />
                 ))}
@@ -281,20 +258,22 @@ function ProductsPageContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={
-      <div className="bg-white min-h-screen">
-        <section className="bg-gradient-to-br from-emerald-50 to-teal-50 py-12">
-          <div className="container mx-auto px-4">
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">All Products</h1>
-          </div>
-        </section>
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            <div className="text-center">Loading products...</div>
-          </div>
-        </section>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="bg-white min-h-screen">
+          <section className="bg-gradient-to-br from-emerald-50 to-teal-50 py-12">
+            <div className="container mx-auto px-4">
+              <h1 className="text-4xl font-bold text-slate-900 mb-4">All Products</h1>
+            </div>
+          </section>
+          <section className="py-12">
+            <div className="container mx-auto px-4">
+              <div className="text-center">Loading products...</div>
+            </div>
+          </section>
+        </div>
+      }
+    >
       <ProductsPageContent />
     </Suspense>
   );

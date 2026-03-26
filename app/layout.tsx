@@ -19,13 +19,16 @@ export default function ClientLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="flex flex-col min-h-screen">
         <CartProvider>
           <ClientProviders>
             <ToastProvider>
+              {/* Navbar is sticky top-0 */}
               <Navbar />
+              {/* SecondaryNavbar is sticky top-20 */}
               <SecondaryNavbar />
-              <main className="min-h-screen bg-gray-50">
+              {/* Main content — flex-1 fills remaining height */}
+              <main className="flex-1 bg-gray-50">
                 {children}
               </main>
               <Footer />

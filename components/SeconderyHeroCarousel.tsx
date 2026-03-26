@@ -7,18 +7,17 @@ import "swiper/css";
 import Image from "next/image";
 import Link from "next/link";
 
-// Correct image imports from your folder
-import hero1 from "../public/assets/hero/hero1.jpg"
+import hero1 from "../public/assets/hero/hero1.jpg";
 import hero2 from "../public/assets/hero/hero2.jpg";
-import foodImage from "@/app/assets/images/food.png";
+import hero3 from "../public/assets/hero/hero3.jpg";
 
 const slides = [
   {
     image: hero1,
-    title: "Bring The Taste Of Heritageraghu",
+    title: "Bring The Taste Of Heritage",
     subtitle: "Back To Your Kitchen",
-    description: "Rediscover the art of healthy cooking.",
-    button: "SHOP ALL COLLECTION",
+    description: "Rediscover the art of healthy cooking with our handcrafted Bronze, Brass, and Cast Iron cookware. Pure. Natural. Timeless.",
+    button: "SHOP ALL COLLECTIONS",
     link: "/products",
   },
   {
@@ -30,7 +29,7 @@ const slides = [
     link: "/products",
   },
   {
-    image: foodImage,
+    image: hero3,
     title: "Traditional Kitchen",
     subtitle: "Healthy Cooking",
     description: "Cook with authentic traditional cookware.",
@@ -51,14 +50,18 @@ export default function HeroCarousel() {
           <SwiperSlide key={index}>
             <div className="grid md:grid-cols-2 h-[520px]">
 
-              <Image
-                src={slide.image}
-                alt={slide.title}
-                width={800}
-                height={520}
-                className="object-cover w-full h-full"
-              />
+              {/* LEFT SIDE - Image */}
+              <div className="relative w-full h-full">
+                <Image
+                  src={slide.image}
+                  alt={slide.title}
+                  fill
+                  className="object-cover"
+                  priority={index === 0}
+                />
+              </div>
 
+              {/* RIGHT SIDE - Text Content */}
               <div className="flex items-center bg-[#D9A441] px-12">
                 <div>
                   <h1 className="text-4xl font-bold">
@@ -67,10 +70,10 @@ export default function HeroCarousel() {
                     <span className="text-white">{slide.subtitle}</span>
                   </h1>
 
-                  <p className="mt-4">{slide.description}</p>
+                  <p className="mt-4 text-gray-800">{slide.description}</p>
 
                   <Link href={slide.link}>
-                    <button className="mt-6 bg-black text-white px-6 py-3">
+                    <button className="mt-6 bg-black text-white px-6 py-3 hover:bg-gray-800 transition-colors">
                       {slide.button}
                     </button>
                   </Link>
