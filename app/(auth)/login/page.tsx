@@ -34,7 +34,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8 sm:mb-10">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-900 bg-clip-text text-transparent mb-3 sm:mb-4">
-            Kitchen Kettles
+            MannarCraft
           </h1>
           <p className="text-base sm:text-lg text-slate-600 font-medium">
             Welcome back

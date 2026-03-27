@@ -24,30 +24,29 @@ export default function SecondaryNavbar() {
         setOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <div className="relative bg-[#f5b335] border-b">
+    <div className="sticky top-20 z-40 bg-[#f5b335] border-b shadow-sm w-full">
       <div className="max-w-7xl mx-auto flex items-center gap-8 px-4 py-3">
 
         {/* MAIN CATEGORIES BUTTON */}
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 font-semibold"
+          className="flex items-center gap-2 font-semibold whitespace-nowrap"
         >
           ☰ MAIN CATEGORIES
         </button>
 
         {/* TOP LINKS */}
-        <nav className="flex gap-6 text-sm font-medium">
+        <nav className="flex gap-6 text-sm font-medium overflow-x-auto">
           {categories.map((cat) => (
             <Link
               key={cat.slug}
               href={`/categories/${cat.slug}`}
-              className="hover:underline"
+              className="hover:underline whitespace-nowrap"
             >
               {cat.name}
             </Link>

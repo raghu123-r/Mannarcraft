@@ -196,7 +196,8 @@ export async function getOrder(id: string): Promise<Order | null> {
 }
 
 /**
- * Alias for getOrder() to match naming convention
+ * Alias for getOrder() to match naming conpm run dev
+ * nvention
  * Fetch a single order by ID
  */
 export async function getOrderById(id: string): Promise<Order | null> {
