@@ -21,6 +21,17 @@ const HomeCategories = dynamic(() => import("@/components/HomeCategories"), { ss
 const PRODUCTS_PER_BATCH = 8;
 const MAX_PRODUCTS = 40;
 
+// ── Deduplicate products by _id to prevent duplicate React keys ───────────────
+function deduplicateProducts(products: Product[]): Product[] {
+  const seen = new Set<string>();
+  return products.filter((p) => {
+    const id = p._id || (p as any).id;
+    if (!id || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,35 +40,25 @@ export default function HomePage() {
   const [hasMore, setHasMore] = useState(true);
   const [seed, setSeed] = useState<number | null>(null);
 
-  // Infinite scroll trigger ref
   const loadMoreTriggerRef = useRef<HTMLDivElement | null>(null);
-
-  // Horizontal scroll for products
   const productScrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // ── Initial fetch ──────────────────────────────────────────────
   useEffect(() => {
     fetchInitialData();
   }, []);
 
-  // ── Infinite scroll observer ───────────────────────────────────
   useEffect(() => {
     if (!hasMore || loading || loadingMore || products.length >= MAX_PRODUCTS) return;
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) loadMoreProducts();
-      },
+      (entries) => { if (entries[0].isIntersecting) loadMoreProducts(); },
       { rootMargin: "300px", threshold: 0.1 }
     );
-
     if (loadMoreTriggerRef.current) observer.observe(loadMoreTriggerRef.current);
     return () => observer.disconnect();
   }, [hasMore, loading, loadingMore, products.length]);
 
-  // ── Track horizontal scroll for arrow buttons ─────────────────
   useEffect(() => {
     const el = productScrollRef.current;
     if (!el) return;
@@ -78,7 +79,8 @@ export default function HomePage() {
         { cache: "no-store" }
       );
       const json = await res.json();
-      setProducts(json.data || []);
+      // ✅ Deduplicate on initial load
+      setProducts(deduplicateProducts(json.data || []));
       setSeed(json.seed);
       setHasMore(json.hasMore);
     } catch {
@@ -99,7 +101,8 @@ export default function HomePage() {
         { cache: "no-store" }
       );
       const json = await res.json();
-      setProducts((prev) => [...prev, ...(json.data || [])]);
+      // ✅ Merge then deduplicate to prevent duplicate keys across pages
+      setProducts((prev) => deduplicateProducts([...prev, ...(json.data || [])]));
       setHasMore(json.hasMore);
     } finally {
       setLoadingMore(false);
@@ -160,7 +163,7 @@ export default function HomePage() {
 
       <BrandsPreview />
 
-      {/* 🗂 CATEGORIES — Amazon-style horizontal scroll */}
+      {/* 🗂 CATEGORIES */}
       <HomeCategories />
 
       <ProductFeatures />
@@ -168,18 +171,14 @@ export default function HomePage() {
       {/* ⭐ CUSTOMER TESTIMONIALS */}
       <HomeTestimonials />
 
-      {/* 🛒 TOP PICKS — Horizontal scroll + infinite scroll */}
+      {/* 🛒 TOP PICKS */}
       {(loading || products.length > 0) && (
         <section className="w-full bg-white py-6 sm:py-8">
           <div className="max-w-8xl mx-auto px-4 sm:px-6">
-            {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg sm:text-xl md:text-2xl font-bold">Top Picks for You</h2>
               <div className="flex items-center gap-3">
-                <Link
-                  href="/products"
-                  className="text-sm text-emerald-600 hover:underline font-medium"
-                >
+                <Link href="/products" className="text-sm text-emerald-600 hover:underline font-medium">
                   See all offers →
                 </Link>
                 <div className="flex gap-1">
@@ -207,19 +206,24 @@ export default function HomePage() {
               </div>
             ) : (
               <>
-                {/* Horizontal scroll row */}
                 <div
                   ref={productScrollRef}
                   className="flex gap-3 overflow-x-auto scroll-smooth pb-2"
                   style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                 >
-                  {products.map((p) => (
-                    <div key={p._id || p.id} className="flex-shrink-0 w-44 sm:w-48 md:w-52">
-                      <ProductCard product={p} />
-                    </div>
-                  ))}
+                  {products.map((p, index) => {
+                    const id = p._id || (p as any).id;
+                    return (
+                      // ✅ Prefixed key ensures uniqueness even if id somehow repeats
+                      <div
+                        key={id ? `pick-${id}` : `pick-idx-${index}`}
+                        className="flex-shrink-0 w-44 sm:w-48 md:w-52"
+                      >
+                        <ProductCard product={p} />
+                      </div>
+                    );
+                  })}
 
-                  {/* Inline loader at end of scroll row while loading more */}
                   {loadingMore && (
                     <div className="flex-shrink-0 w-44 sm:w-48 md:w-52 flex items-center justify-center">
                       <GlobalLoader size="medium" />
@@ -227,12 +231,10 @@ export default function HomePage() {
                   )}
                 </div>
 
-                {/* Invisible infinite scroll trigger */}
                 {!loadingMore && hasMore && products.length < MAX_PRODUCTS && (
                   <div ref={loadMoreTriggerRef} className="h-4" />
                 )}
 
-                {/* View more button when max reached */}
                 {!loading && showViewMoreButton && (
                   <div className="flex justify-center mt-6">
                     <Link href="/products">
