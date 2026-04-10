@@ -5,6 +5,8 @@
  * and payment timestamp with copy-to-clipboard functionality.
  *
  * Usage: Used in the Payment Result page to show detailed payment information.
+ * NOTE: This component is only rendered for online payments (Razorpay, etc.)
+ * It is hidden automatically for COD orders via page.tsx conditional rendering.
  */
 
 "use client";

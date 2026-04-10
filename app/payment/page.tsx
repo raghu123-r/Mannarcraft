@@ -175,7 +175,6 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Loader2,
   AlertCircle,
   ShoppingBag,
   FileText,
@@ -203,10 +202,8 @@ function PaymentPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  // DEMO: State for simulating pending → success transition
   const [demoCheckingStatus, setDemoCheckingStatus] = useState(false);
 
-  // Fetch order details on mount or when orderId changes
   useEffect(() => {
     if (orderId) {
       fetchOrderDetails();
@@ -217,10 +214,6 @@ function PaymentPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
-  /**
-   * Fetch order details from API
-   * Uses getOrder helper with fallback to direct fetch
-   */
   const fetchOrderDetails = async () => {
     if (!orderId) return;
 
@@ -232,7 +225,6 @@ function PaymentPageContent() {
       if (USE_MOCK_ORDER_FOR_PREVIEW) {
         await new Promise((r) => setTimeout(r, 300));
 
-        // Return appropriate mock data based on preview state
         let mockData;
         switch (PREVIEW_PAYMENT_STATE) {
           case "success":
@@ -253,7 +245,7 @@ function PaymentPageContent() {
         return;
       }
 
-      // Try using the API helper first
+      // Real API call
       let orderData: Order | null = null;
 
       try {
@@ -261,7 +253,6 @@ function PaymentPageContent() {
       } catch (apiError) {
         console.warn("getOrder helper failed, trying direct fetch:", apiError);
 
-        // Fallback to direct fetch
         const response = await fetch(
           `https://mk-backend-a6c7.onrender.com/api/orders/${orderId}`,
           {
@@ -297,16 +288,12 @@ function PaymentPageContent() {
     }
   };
 
-  /**
-   * Re-fetch order details (for checking status updates)
-   */
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchOrderDetails();
     setRefreshing(false);
   };
 
-  // Handle WhatsApp support link
   const handleContactSupport = () => {
     const message = encodeURIComponent(
       `Hi, I need help with my order #${orderId?.slice(-8).toUpperCase()}`,
@@ -314,29 +301,21 @@ function PaymentPageContent() {
     window.open(`https://wa.me/919876543210?text=${message}`, "_blank");
   };
 
-  // DEMO: Handler for "Check Status" button in pending state
-  // Simulates payment confirmation after a delay
   const handleDemoCheckStatus = async () => {
     if (!USE_MOCK_ORDER_FOR_PREVIEW) return;
-
     setDemoCheckingStatus(true);
-    // Simulate checking payment status with backend
     await new Promise((r) => setTimeout(r, 2000));
-
-    // Transition to success state
     setOrder(MOCK_ORDER_SUCCESS as any);
     setDemoCheckingStatus(false);
   };
 
-  // DEMO: Handler for "Retry Payment" button in failed state
   const handleDemoRetryPayment = () => {
-    // In a real app, this would re-open the Razorpay checkout modal
-    // For demo, just show a toast or alert
     alert(
       "Demo: Would re-open payment checkout modal here. Payment flow would restart.",
     );
   };
 
+  // ── Loading State ──────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -344,7 +323,7 @@ function PaymentPageContent() {
           <div className="flex flex-col items-center justify-center">
             <GlobalLoader size="large" />
             <p className="text-gray-600 text-center mt-4">
-              Loading payment details...
+              Loading order details...
             </p>
           </div>
         </div>
@@ -352,7 +331,7 @@ function PaymentPageContent() {
     );
   }
 
-  // Error State - No Order ID
+  // ── Error State - No Order ID ──────────────────────────────────────────────
   if (!orderId) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -363,7 +342,7 @@ function PaymentPageContent() {
               No Order ID Found
             </h1>
             <p className="text-gray-600 mb-6">
-              Please provide a valid order ID to view payment details.
+              Please provide a valid order ID to view order details.
             </p>
             <Link
               href="/account/orders"
@@ -377,7 +356,7 @@ function PaymentPageContent() {
     );
   }
 
-  // Error State - Failed to Load Order
+  // ── Error State - Failed to Load Order ────────────────────────────────────
   if (error || !order) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -385,7 +364,7 @@ function PaymentPageContent() {
           <div className="flex flex-col items-center text-center">
             <AlertCircle className="w-12 h-12 text-red-600 mb-4" />
             <h1 className="text-xl font-semibold text-gray-900 mb-2">
-              Failed to Load Payment Details
+              Failed to Load Order Details
             </h1>
             <p className="text-gray-600 mb-6">{error || "Order not found"}</p>
             <div className="flex gap-3 w-full">
@@ -409,21 +388,25 @@ function PaymentPageContent() {
   }
 
   const paymentStatus = order.payment?.status || order.status || "pending";
+
   const isPaid =
     paymentStatus.toLowerCase() === "paid" ||
     paymentStatus.toLowerCase() === "success" ||
     paymentStatus.toLowerCase() === "completed";
 
+  // ── Payment Details section is hidden (set to false) ──────────────────────
+  const showPaymentDetails = false;
+  // ──────────────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Payment Status Banner */}
+
+        {/* ── Order Status Banner — shows "Order Successful!" ── */}
         <div className="mb-6 sm:mb-8">
           <PaymentResult
             status={paymentStatus}
             orderId={order._id || order.id || orderId}
-            transactionId={order.payment?.transactionId}
-            // DEMO: Pass handlers for interactive demo buttons
             onCheckStatus={
               USE_MOCK_ORDER_FOR_PREVIEW && paymentStatus === "pending"
                 ? handleDemoCheckStatus
@@ -443,7 +426,8 @@ function PaymentPageContent() {
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Order Summary */}
+
+          {/* Left Column - Order Summary + Shipping Address */}
           <div className="lg:col-span-2 space-y-6">
             <PaymentOrderSummary order={order} />
 
@@ -482,9 +466,8 @@ function PaymentPageContent() {
             )}
           </div>
 
-          {/* Right Column - Payment Details and Actions */}
+          {/* Right Column - Actions */}
           <div className="lg:col-span-1 space-y-6">
-            <PaymentDetails order={order} />
 
             {/* Action Buttons */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -492,6 +475,7 @@ function PaymentPageContent() {
                 Actions
               </h2>
               <div className="space-y-3">
+
                 {/* View Order */}
                 <Link
                   href={`/account/orders/${order._id || order.id}`}

@@ -16,6 +16,8 @@ interface PaymentResultProps {
   status: string;
   orderId: string;
   transactionId?: string;
+  successTitle?: string;
+  successMessage?: string;
   // DEMO: Optional props for interactive pending/failed state demos
   onCheckStatus?: () => void;
   onRetryPayment?: () => void;
@@ -28,6 +30,8 @@ export default function PaymentResult({
   status,
   orderId,
   transactionId,
+  successTitle,
+  successMessage,
   onCheckStatus,
   onRetryPayment,
   onContactSupport,
@@ -47,9 +51,10 @@ export default function PaymentResult({
           textColor: "text-green-800",
           iconColor: "text-green-600",
           icon: <CheckCircle className="w-12 h-12" />,
-          title: "Payment Successful!",
+          title: successTitle ?? "Order Successful!",
           message:
-            "Your payment has been processed successfully. You will receive an email & WhatsApp confirmation shortly.",
+            successMessage ??
+            "Your order has been placed successfully. You will receive an email & WhatsApp confirmation shortly.",
         };
       case "pending":
       case "processing":
@@ -123,7 +128,7 @@ export default function PaymentResult({
             </span>
           </p>
 
-          {/* Transaction ID if available */}
+          {/* Transaction ID — only show for online payments when transactionId exists */}
           {transactionId && (
             <p className={`text-sm ${config.textColor} opacity-75`}>
               Transaction ID:{" "}
