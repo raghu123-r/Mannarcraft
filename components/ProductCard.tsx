@@ -7,7 +7,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { normalizeSrc } from "@/lib/normalizeSrc";
 import DefaultProductImage from "@/assets/images/ChatGPT Image Nov 28, 2025, 10_33_10 PM.png";
-import { ShoppingCart, Star, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import SizeSelectionModal from "@/components/SizeSelectionModal";
 
 interface Variant {
@@ -163,7 +163,7 @@ export default function ProductCard({ product }: any) {
         </div>
       )}
 
-      {/* Image — square keeps products looking uniform in 5-col grid */}
+      {/* Image */}
       <Link href={`/products/${product.slug}`} className="block">
         <div
           className={`relative w-full aspect-square bg-slate-50 overflow-hidden ${
@@ -255,32 +255,41 @@ export default function ProductCard({ product }: any) {
             </span>
           </button>
         ) : (
-          <div className="w-full h-8 flex items-center gap-1">
+          // ✅ Single unified row: Go to Cart + quantity controls in one bordered box
+          <div className="w-full flex items-center h-8 border border-gray-300 rounded-md overflow-hidden shadow-sm bg-white">
+            {/* Go to Cart */}
             <Link
               href="/cart"
-              className="flex-1 h-full bg-slate-900 hover:bg-slate-700 text-white text-[11px] font-semibold rounded-md flex items-center justify-center transition-colors"
+              className="flex-1 h-full bg-slate-900 hover:bg-slate-700 text-white text-[11px] font-semibold flex items-center justify-center transition-colors"
             >
               Go to Cart
             </Link>
-            <div className="flex items-center border border-slate-200 rounded-md overflow-hidden h-full">
-              <button
-                onClick={decreaseQty}
-                className="w-7 h-full flex items-center justify-center text-emerald-600 hover:bg-emerald-50 transition"
-                aria-label="Decrease quantity"
-              >
-                <Minus size={11} strokeWidth={2.5} />
-              </button>
-              <div className="w-7 flex items-center justify-center font-semibold text-slate-800 text-xs border-x border-slate-200 h-full">
-                {currentQty}
-              </div>
-              <button
-                onClick={increaseQty}
-                className="w-7 h-full flex items-center justify-center text-emerald-600 hover:bg-emerald-50 transition"
-                aria-label="Increase quantity"
-              >
-                <Plus size={11} strokeWidth={2.5} />
-              </button>
+
+            {/* Divider */}
+            <div className="w-px h-full bg-gray-300" />
+
+            {/* Decrease */}
+            <button
+              onClick={decreaseQty}
+              className="w-7 h-full flex items-center justify-center text-red-500 hover:bg-gray-50 transition border-r border-gray-300 text-sm font-bold"
+              aria-label="Decrease quantity"
+            >
+              −
+            </button>
+
+            {/* Quantity */}
+            <div className="w-7 h-full flex items-center justify-center text-xs font-semibold text-gray-800">
+              {currentQty}
             </div>
+
+            {/* Increase */}
+            <button
+              onClick={increaseQty}
+              className="w-7 h-full flex items-center justify-center text-red-500 hover:bg-gray-50 transition border-l border-gray-300 text-sm font-bold"
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
           </div>
         )}
       </div>

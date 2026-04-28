@@ -15,6 +15,15 @@ try {
   supabaseHostname = "";
 }
 
+// Parse backend URL hostname dynamically
+const rawBackendUrl = process.env.NEXT_PUBLIC_API_URL || "";
+let backendHostname = "";
+try {
+  if (rawBackendUrl) backendHostname = new URL(rawBackendUrl).hostname;
+} catch (err) {
+  console.warn("Could not parse NEXT_PUBLIC_API_URL for remotePatterns:", rawBackendUrl);
+}
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -24,9 +33,6 @@ const nextConfig = {
 
   experimental: {},
 
-  // ✅ FIXED: rewrites now use env variable instead of localhost
-  // On Vercel: set NEXT_PUBLIC_API_URL = https://your-backend.onrender.com
-  // On localhost: set NEXT_PUBLIC_API_URL = http://localhost:5001
   ...(process.env.NEXT_PUBLIC_API_URL
     ? {
         rewrites: async () => [
@@ -41,6 +47,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
     remotePatterns: [
+      // ── Supabase (dynamic from env) ──────────────────────────────
       ...(supabaseHostname
         ? [
             {
@@ -59,13 +66,48 @@ const nextConfig = {
         pathname: "/storage/v1/object/public/**",
       },
 
+      // ── Your backend API server (dynamic from env) ───────────────
+      // Covers: mk-backend-a6c7.onrender.com or any other host in NEXT_PUBLIC_API_URL
+      ...(backendHostname
+        ? [
+            {
+              protocol: "https",
+              hostname: backendHostname,
+              port: "",
+              pathname: "/**",
+            },
+          ]
+        : []),
+
+      // ── Fallback: allow all Render.com subdomains ─────────────────
+      {
+        protocol: "https",
+        hostname: "*.onrender.com",
+        port: "",
+        pathname: "/**",
+      },
+
+      // ── Local development backend ─────────────────────────────────
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "5001",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "5000",
+        pathname: "/**",
+      },
+
+      // ── Placeholder / Bing ────────────────────────────────────────
       {
         protocol: "https",
         hostname: "via.placeholder.com",
         port: "",
         pathname: "/**",
       },
-
       { protocol: "https", hostname: "th.bing.com", pathname: "/**" },
       { protocol: "https", hostname: "www.bing.com", pathname: "/**" },
       { protocol: "https", hostname: "tse1.mm.bing.net", pathname: "/**" },
@@ -76,7 +118,6 @@ const nextConfig = {
       { protocol: "https", hostname: "tse6.mm.bing.net", pathname: "/**" },
       { protocol: "https", hostname: "tse7.mm.bing.net", pathname: "/**" },
       { protocol: "https", hostname: "tse8.mm.bing.net", pathname: "/**" },
-
       { protocol: "https", hostname: "www.timothylangston.com", pathname: "/**" },
       { protocol: "https", hostname: "m.media-amazon.com", pathname: "/**" },
     ],

@@ -248,7 +248,9 @@ export default function ProductPage() {
       if (p?._id) {
         setLoadingSimilar(true);
         try {
-          const similarData = await apiGet(`/products/${p._id}/similar?limit=8`);
+          const similarData = await apiGet(
+            `/products/${p._id}/similar?limit=8`
+          );
           setSimilarProducts(similarData || []);
         } catch {
           setSimilarProducts([]);
@@ -298,8 +300,7 @@ export default function ProductPage() {
       id: product._id,
       name: product.title,
       price: effectivePrice,
-      image_url:
-        typeof mainImage === "string" ? mainImage : mainImage.src,
+      image_url: typeof mainImage === "string" ? mainImage : mainImage.src,
       variantId: selectedVariant?._id,
       variantName: selectedVariant?.name,
     };
@@ -345,11 +346,9 @@ export default function ProductPage() {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
 
-          {/* ── LEFT: Image Gallery (Amazon style: vertical thumbs + main) ── */}
+          {/* ── LEFT: Image Gallery ── */}
           <div className="lg:w-[420px] xl:w-[500px] flex-shrink-0">
             <div className="flex gap-3 sticky top-4">
-
-              {/* Vertical thumbnail strip */}
               {images.length > 1 && (
                 <div className="flex flex-col gap-2 w-[60px] flex-shrink-0">
                   {images.map((img: any, idx: number) => (
@@ -378,7 +377,6 @@ export default function ProductPage() {
                 </div>
               )}
 
-              {/* Main image */}
               <div
                 className="flex-1 relative bg-white rounded border border-gray-200 overflow-hidden cursor-zoom-in group"
                 style={{ aspectRatio: "1/1" }}
@@ -410,20 +408,16 @@ export default function ProductPage() {
 
           {/* ── MIDDLE: Product Info ── */}
           <div className="flex-1 min-w-0">
-
-            {/* Brand */}
             {product.brand?.name && (
               <p className="text-sm text-blue-600 hover:text-orange-500 hover:underline cursor-pointer mb-1 font-medium">
                 {product.brand.name}
               </p>
             )}
 
-            {/* Title */}
             <h1 className="text-xl sm:text-2xl font-medium text-gray-900 leading-snug mb-3">
               {product.title}
             </h1>
 
-            {/* Rating row */}
             {product.attributes?.ratingAvg > 0 && (
               <div className="flex items-center gap-3 mb-3 pb-3 border-b border-gray-200">
                 <StarRating
@@ -433,14 +427,15 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Price block */}
             <div className="mb-4">
               {discount > 0 && (
                 <div className="flex items-center gap-2 mb-1">
                   <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded">
                     -{discount}% off
                   </span>
-                  <span className="text-xs text-gray-500">Limited time deal</span>
+                  <span className="text-xs text-gray-500">
+                    Limited time deal
+                  </span>
                 </div>
               )}
 
@@ -472,7 +467,6 @@ export default function ProductPage() {
               </p>
             </div>
 
-            {/* Variant / Size Selector */}
             {variants.length > 0 && (
               <div className="mb-4 pb-4 border-b border-gray-200">
                 <VariantSelector
@@ -483,7 +477,6 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Category */}
             {product.category?.name && (
               <div className="flex items-center gap-2 text-sm mb-3">
                 <Tag size={14} className="text-gray-500" />
@@ -494,7 +487,6 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Description (short) */}
             {product.description && (
               <div className="mb-4 pb-4 border-b border-gray-200">
                 <p className="text-sm text-gray-700 leading-relaxed line-clamp-4">
@@ -503,7 +495,6 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Features */}
             <div className="space-y-2 mb-4">
               <div className="flex items-center gap-2 text-sm text-gray-700">
                 <Truck size={15} className="text-green-600 flex-shrink-0" />
@@ -515,17 +506,23 @@ export default function ProductPage() {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-700">
-                <ShieldCheck size={15} className="text-blue-600 flex-shrink-0" />
+                <ShieldCheck
+                  size={15}
+                  className="text-blue-600 flex-shrink-0"
+                />
                 <span>100% Secure Payment</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-700">
-                <RotateCcw size={15} className="text-orange-500 flex-shrink-0" />
+                <RotateCcw
+                  size={15}
+                  className="text-orange-500 flex-shrink-0"
+                />
                 <span>Easy Returns &amp; Exchanges</span>
               </div>
             </div>
           </div>
 
-          {/* ── RIGHT: Buy Box (Amazon style) ── */}
+          {/* ── RIGHT: Buy Box ── */}
           <div className="lg:w-[240px] xl:w-[260px] flex-shrink-0">
             <div className="border border-gray-200 rounded-lg p-4 shadow-sm">
 
@@ -567,13 +564,17 @@ export default function ProductPage() {
                 )}
               </div>
 
-              {/* Quantity + Cart */}
+              {/* ✅ Quantity + Cart — single row when item in cart */}
               {currentQty > 0 ? (
-                <div className="space-y-2">
-                  <QuantitySelector value={currentQty} onChange={handleQty} />
+                <div className="flex items-center gap-2 w-full mb-2">
+                  <QuantitySelector
+                    value={currentQty}
+                    onChange={handleQty}
+                    size="sm"
+                  />
                   <Link
                     href="/cart"
-                    className="block w-full text-center bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 font-semibold py-2 px-4 rounded-full text-sm transition border border-[#FCD200] shadow-sm"
+                    className="flex-1 text-center bg-[#FFD814] hover:bg-[#F7CA00] text-gray-900 font-semibold py-2 px-3 rounded-full text-sm transition border border-[#FCD200] shadow-sm whitespace-nowrap"
                   >
                     Go to Cart
                   </Link>

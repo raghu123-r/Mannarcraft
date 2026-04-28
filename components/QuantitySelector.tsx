@@ -18,72 +18,42 @@ export default function QuantitySelector({
   size = "md",
 }: QuantitySelectorProps) {
   const handleDecrement = () => {
-    if (value > min) {
-      onChange(value - 1);
-    }
+    if (value > min) onChange(value - 1);
   };
 
   const handleIncrement = () => {
-    if (value < max) {
-      onChange(value + 1);
-    }
+    if (value < max) onChange(value + 1);
   };
 
   const handleKeyDown = (
     e: React.KeyboardEvent,
-    action: "increment" | "decrement",
+    action: "increment" | "decrement"
   ) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      if (action === "increment") {
-        handleIncrement();
-      } else {
-        handleDecrement();
-      }
+      if (action === "increment") handleIncrement();
+      else handleDecrement();
     }
   };
 
-  const sizeClasses = {
-    sm: {
-      container: "rounded-2xl shadow-sm",
-      button: "w-6 h-6 text-sm",
-      value: "w-8 text-sm",
-    },
-    md: {
-      container: "rounded-2xl shadow-md",
-      button: "w-8 h-8 text-base",
-      value: "w-10 text-base",
-    },
-  };
-
-  const classes = sizeClasses[size];
+  const btnW = size === "sm" ? "w-7" : "w-8";
+  const valW = size === "sm" ? "w-7" : "w-10";
 
   return (
-    <div
-      className={`flex items-center bg-white border border-gray-200 ${classes.container} overflow-hidden`}
-    >
+    <div className="inline-flex items-center border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm">
       <button
         type="button"
         onClick={handleDecrement}
         onKeyDown={(e) => handleKeyDown(e, "decrement")}
         disabled={value <= min}
-        className={`${classes.button} flex items-center justify-center text-red-500 hover:bg-red-50 transition disabled:opacity-30 disabled:cursor-not-allowed`}
+        className={`${btnW} h-8 flex items-center justify-center text-red-500 hover:bg-gray-50 transition disabled:opacity-30 disabled:cursor-not-allowed text-lg font-bold border-r border-gray-300`}
         aria-label="Decrease quantity"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="currentColor"
-          className="w-4 h-4"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
-        </svg>
+        −
       </button>
 
       <div
-        className={`${classes.value} flex items-center justify-center font-semibold text-gray-800`}
+        className={`${valW} h-8 flex items-center justify-center text-sm font-semibold text-gray-800`}
       >
         {value}
       </div>
@@ -93,23 +63,10 @@ export default function QuantitySelector({
         onClick={handleIncrement}
         onKeyDown={(e) => handleKeyDown(e, "increment")}
         disabled={value >= max}
-        className={`${classes.button} flex items-center justify-center text-red-500 hover:bg-red-50 transition disabled:opacity-30 disabled:cursor-not-allowed`}
+        className={`${btnW} h-8 flex items-center justify-center text-red-500 hover:bg-gray-50 transition disabled:opacity-30 disabled:cursor-not-allowed text-lg font-bold border-l border-gray-300`}
         aria-label="Increase quantity"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2}
-          stroke="currentColor"
-          className="w-4 h-4"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 5v14m7-7H5"
-          />
-        </svg>
+        +
       </button>
     </div>
   );

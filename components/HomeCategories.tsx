@@ -14,6 +14,7 @@ type Category = {
   slug?: string;
   imageUrl?: string;
   image?: string;
+  image_url?: string;
   imagePath?: string;
 };
 
@@ -30,7 +31,9 @@ export default function HomeCategories() {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(buildUrl("/api/homepage/categories"), { cache: "no-store" });
+        // ✅ FIXED: buildUrl("/homepage/categories") calls backend directly
+        // bypasses Next.js rewrite rule — returns imageUrl correctly
+        const res = await fetch(buildUrl("/homepage/categories"), { cache: "no-store" });
         if (!res.ok) throw new Error(`Failed to fetch categories: ${res.status}`);
         const json = await res.json();
         const data = json?.data ?? [];
@@ -38,7 +41,9 @@ export default function HomeCategories() {
 
         const withImages = await Promise.all(
           cats.map(async (c) => {
-            const apiImageUrl = c.imageUrl ?? c.image ?? "";
+            // ✅ backend now sends imageUrl normalized from image_url || image
+            // fall back to supabase slug-based URL if still empty
+            const apiImageUrl = c.imageUrl || c.image_url || c.image || "";
             let img = "";
             try {
               img = apiImageUrl || getCategoryLogoUrl(c.slug ?? c._id ?? "") || "";
@@ -113,7 +118,6 @@ export default function HomeCategories() {
             <Link href="/categories" className="text-sm text-emerald-600 hover:underline font-medium">
               See all offers →
             </Link>
-            {/* Arrow buttons */}
             <div className="flex gap-1">
               <button
                 onClick={() => scroll("left")}
@@ -166,7 +170,9 @@ export default function HomeCategories() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="text-gray-400 text-xs">No image</div>
+                      <div className="w-24 h-24 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs text-center px-1">
+                        {cat.name ?? "Category"}
+                      </div>
                     )}
                   </div>
                   <p className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">
@@ -179,7 +185,6 @@ export default function HomeCategories() {
         </div>
       </div>
 
-      {/* Hide scrollbar cross-browser */}
       <style jsx>{`
         div::-webkit-scrollbar {
           display: none;

@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { buildUrl } from "@/lib/api";
+
 interface HeroImage {
   _id: string;
   title: string;
@@ -16,7 +17,7 @@ export default function HeroCarousel() {
   const [slides, setSlides] = useState<HeroImage[]>([]);
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [interval, setIntervalDuration] = useState(5000); // Default 5 seconds
+  const [interval, setIntervalDuration] = useState(5000);
 
   useEffect(() => {
     fetchHeroImages();
@@ -24,15 +25,16 @@ export default function HeroCarousel() {
 
   async function fetchHeroImages() {
     try {
-      const res = await fetch(buildUrl("/api/homepage/hero-images?limit=5"), { 
-        cache: "no-store" 
+      // ✅ FIXED: removed leading /api — buildUrl already appends it
+      const res = await fetch(buildUrl("/homepage/hero-images?limit=5"), {
+        cache: "no-store",
       });
-      
+
       if (!res.ok) throw new Error("Failed to fetch hero images");
-      
+
       const json = await res.json();
       const images = json?.data || [];
-      
+
       setSlides(Array.isArray(images) ? images : []);
     } catch (err) {
       console.error("Hero images fetch error:", err);
@@ -44,15 +46,14 @@ export default function HeroCarousel() {
 
   useEffect(() => {
     if (slides.length === 0) return;
-    
+
     const t = setInterval(() => {
       setIdx((i) => (i + 1) % slides.length);
     }, interval);
-    
+
     return () => clearInterval(t);
   }, [slides.length, interval]);
 
-  // Show minimal fallback during load
   if (loading) {
     return (
       <div className="relative mt-2 sm:mt-4">
@@ -61,7 +62,6 @@ export default function HeroCarousel() {
     );
   }
 
-  // Don't render if no hero images
   if (slides.length === 0) {
     return null;
   }

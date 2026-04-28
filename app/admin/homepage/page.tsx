@@ -471,7 +471,7 @@ export default function AdminHomepagePage() {
 
       <div className="h-12" />
 
-      {/* ── NEW: Homepage Sections ── */}
+      {/* ── Homepage Sections ── */}
       <HomepageSectionsManager
         allCategories={allCategories}
         allBrands={allBrands}
@@ -1159,7 +1159,7 @@ function TopPicksSection({
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// HOMEPAGE SECTIONS MANAGER (NEW)
+// HOMEPAGE SECTIONS MANAGER — UPDATED
 // ═════════════════════════════════════════════════════════════════════════════
 
 function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: FilterItem[]; allBrands: FilterItem[] }) {
@@ -1321,6 +1321,7 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1420,7 +1421,7 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
         )}
       </div>
 
-      {/* Form */}
+      {/* ── Add / Edit Form ── */}
       {showForm && (
         <div className="border-t border-gray-200 bg-gray-50 rounded-b-xl">
           <div className="p-6">
@@ -1432,7 +1433,8 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
             </div>
 
             <div className="space-y-6">
-              {/* Section Type */}
+
+              {/* ── Section Type ── */}
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-3">Section Type</label>
                 <div className="flex flex-wrap gap-3">
@@ -1440,7 +1442,12 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
                     <label key={t} className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-colors ${
                       form.sectionType === t ? "border-blue-500 bg-blue-50 text-blue-800" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                     }`}>
-                      <input type="radio" name="sectionType" value={t} checked={form.sectionType === t} onChange={() => setForm(f => ({ ...f, sectionType: t }))} className="sr-only" />
+                      <input
+                        type="radio" name="sectionType" value={t}
+                        checked={form.sectionType === t}
+                        onChange={() => setForm(f => ({ ...f, sectionType: t }))}
+                        className="sr-only"
+                      />
                       {typeIcon(t)}
                       <span className="text-sm font-semibold capitalize">{t}</span>
                     </label>
@@ -1448,9 +1455,11 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
                 </div>
               </div>
 
-              {/* Title */}
+              {/* ── Section Title ── */}
               <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Section Title <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  Section Title <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text" value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
@@ -1459,62 +1468,89 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
                 />
               </div>
 
-              {/* Products-only filters */}
+              {/* ── Categories Filter (products + categories) ── */}
+              {(form.sectionType === "products" || form.sectionType === "categories") && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
+                    {form.sectionType === "categories" ? "Select Categories" : "Categories (Filter)"}
+                  </label>
+                  <div className="border-2 border-gray-200 rounded-xl bg-white overflow-hidden">
+                    <div className="max-h-40 overflow-y-auto p-2 space-y-1">
+                      {allCategories.map(cat => (
+                        <label key={cat._id} className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
+                          form.categoryIds.includes(cat._id) ? "bg-blue-50 text-blue-800" : "hover:bg-gray-50 text-gray-700"
+                        }`}>
+                          <input
+                            type="checkbox"
+                            checked={form.categoryIds.includes(cat._id)}
+                            onChange={() => setForm(f => ({ ...f, categoryIds: toggleMultiSelect(f.categoryIds, cat._id) }))}
+                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          {cat.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {form.sectionType === "categories"
+                      ? "Select categories to display in this section."
+                      : "Check to filter products by category."}
+                  </p>
+                </div>
+              )}
+
+              {/* ── Brands Filter (products + brands) ── */}
+              {(form.sectionType === "products" || form.sectionType === "brands") && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
+                    {form.sectionType === "brands" ? "Select Brands" : "Brands (Filter)"}
+                  </label>
+                  <div className="border-2 border-gray-200 rounded-xl bg-white overflow-hidden">
+                    <div className="max-h-40 overflow-y-auto p-2 space-y-1">
+                      {allBrands.map(brand => (
+                        <label key={brand._id} className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
+                          form.brandIds.includes(brand._id) ? "bg-blue-50 text-blue-800" : "hover:bg-gray-50 text-gray-700"
+                        }`}>
+                          <input
+                            type="checkbox"
+                            checked={form.brandIds.includes(brand._id)}
+                            onChange={() => setForm(f => ({ ...f, brandIds: toggleMultiSelect(f.brandIds, brand._id) }))}
+                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          {brand.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {form.sectionType === "brands"
+                      ? "Select brands to display in this section."
+                      : "Check to filter products by brand."}
+                  </p>
+                </div>
+              )}
+
+              {/* ── Products-only: Discount Type + Product Picker ── */}
               {form.sectionType === "products" && (
                 <>
-                  {/* Categories Filter */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Categories (Filter)</label>
-                    <div className="border-2 border-gray-200 rounded-xl bg-white overflow-hidden">
-                      <div className="max-h-40 overflow-y-auto p-2 space-y-1">
-                        {allCategories.map(cat => (
-                          <label key={cat._id} className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
-                            form.categoryIds.includes(cat._id) ? "bg-blue-50 text-blue-800" : "hover:bg-gray-50 text-gray-700"
-                          }`}>
-                            <input
-                              type="checkbox" checked={form.categoryIds.includes(cat._id)}
-                              onChange={() => setForm(f => ({ ...f, categoryIds: toggleMultiSelect(f.categoryIds, cat._id) }))}
-                              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            {cat.name}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500">Check to filter products by category.</p>
-                  </div>
-
-                  {/* Brands Filter */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">Brands (Filter)</label>
-                    <div className="border-2 border-gray-200 rounded-xl bg-white overflow-hidden">
-                      <div className="max-h-40 overflow-y-auto p-2 space-y-1">
-                        {allBrands.map(brand => (
-                          <label key={brand._id} className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors ${
-                            form.brandIds.includes(brand._id) ? "bg-blue-50 text-blue-800" : "hover:bg-gray-50 text-gray-700"
-                          }`}>
-                            <input
-                              type="checkbox" checked={form.brandIds.includes(brand._id)}
-                              onChange={() => setForm(f => ({ ...f, brandIds: toggleMultiSelect(f.brandIds, brand._id) }))}
-                              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            {brand.name}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500">Check to filter products by brand.</p>
-                  </div>
-
                   {/* Discount Type */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-3">Discount Type</label>
                     <div className="flex flex-wrap gap-3 mb-4">
-                      {[{ value: "", label: "None" }, { value: "percentage", label: "Percentage (%)" }, { value: "flat", label: "Flat (₹)" }].map(opt => (
+                      {[
+                        { value: "", label: "None" },
+                        { value: "percentage", label: "Percentage (%)" },
+                        { value: "flat", label: "Flat (₹)" },
+                      ].map(opt => (
                         <label key={opt.value} className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 cursor-pointer text-sm transition-colors ${
                           form.discountType === opt.value ? "border-blue-500 bg-blue-50 text-blue-800" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                         }`}>
-                          <input type="radio" name="discountType" value={opt.value} checked={form.discountType === opt.value} onChange={() => setForm(f => ({ ...f, discountType: opt.value as DiscountType }))} className="sr-only" />
+                          <input
+                            type="radio" name="discountType" value={opt.value}
+                            checked={form.discountType === opt.value}
+                            onChange={() => setForm(f => ({ ...f, discountType: opt.value as DiscountType }))}
+                            className="sr-only"
+                          />
                           {opt.label}
                         </label>
                       ))}
@@ -1523,15 +1559,27 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1.5">Minimum Discount (optional)</label>
-                          <input type="number" value={form.minDiscount} onChange={e => setForm(f => ({ ...f, minDiscount: e.target.value }))} placeholder="e.g., 10" min={0} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" />
+                          <input
+                            type="number" value={form.minDiscount}
+                            onChange={e => setForm(f => ({ ...f, minDiscount: e.target.value }))}
+                            placeholder="e.g., 10" min={0}
+                            className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
+                          />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1.5">Maximum Discount (optional)</label>
-                          <input type="number" value={form.maxDiscount} onChange={e => setForm(f => ({ ...f, maxDiscount: e.target.value }))} placeholder="e.g., 50" min={0} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all" />
+                          <input
+                            type="number" value={form.maxDiscount}
+                            onChange={e => setForm(f => ({ ...f, maxDiscount: e.target.value }))}
+                            placeholder="e.g., 50" min={0}
+                            className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
+                          />
                         </div>
                       </div>
                     )}
-                    <p className="mt-2 text-xs text-gray-500">Use the filters above to narrow down products. Only the title and products will be saved for this section.</p>
+                    <p className="mt-2 text-xs text-gray-500">
+                      Use the filters above to narrow down products. Only the title and products will be saved for this section.
+                    </p>
                   </div>
 
                   {/* Product Picker */}
@@ -1558,21 +1606,28 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
                               const already = form.productIds.find(p => p._id === product._id);
                               return (
                                 <button
-                                  key={product._id} type="button" onClick={() => addProduct(product)} disabled={!!already}
-                                  className={`w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 transition-colors ${already ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                  key={product._id} type="button"
+                                  onClick={() => addProduct(product)}
+                                  disabled={!!already}
+                                  className={`w-full flex items-center gap-3 p-3 text-left hover:bg-gray-50 transition-colors ${already ? "opacity-50 cursor-not-allowed" : ""}`}
                                 >
                                   <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                                     {product.images?.[0] ? (
                                       <Image src={product.images[0]} alt={product.title} width={40} height={40} className="w-full h-full object-cover" />
                                     ) : (
-                                      <div className="w-full h-full flex items-center justify-center"><Package className="w-5 h-5 text-gray-400" /></div>
+                                      <div className="w-full h-full flex items-center justify-center">
+                                        <Package className="w-5 h-5 text-gray-400" />
+                                      </div>
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-900 truncate">{product.title}</p>
                                     <p className="text-xs text-gray-500">₹{product.price}</p>
                                   </div>
-                                  {already ? <span className="text-xs text-emerald-600 font-semibold">Added</span> : <span className="text-xs text-blue-600 font-semibold">+ Add</span>}
+                                  {already
+                                    ? <span className="text-xs text-emerald-600 font-semibold">Added</span>
+                                    : <span className="text-xs text-blue-600 font-semibold">+ Add</span>
+                                  }
                                 </button>
                               );
                             })}
@@ -1589,11 +1644,16 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
                               {product.images?.[0] ? (
                                 <Image src={product.images[0]} alt={product.title} width={36} height={36} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center"><Package className="w-4 h-4 text-gray-400" /></div>
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Package className="w-4 h-4 text-gray-400" />
+                                </div>
                               )}
                             </div>
                             <p className="flex-1 text-xs font-medium text-gray-900 truncate">{product.title}</p>
-                            <button type="button" onClick={() => removeProduct(product._id)} className="p-1 rounded hover:bg-red-50 transition-colors">
+                            <button
+                              type="button" onClick={() => removeProduct(product._id)}
+                              className="p-1 rounded hover:bg-red-50 transition-colors"
+                            >
                               <X className="w-3.5 h-3.5 text-red-500" />
                             </button>
                           </div>
@@ -1604,15 +1664,22 @@ function HomepageSectionsManager({ allCategories, allBrands }: { allCategories: 
                 </>
               )}
 
-              {/* Form Actions */}
+              {/* ── Form Actions ── */}
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={handleSave} disabled={saving} className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                <button
+                  type="button" onClick={handleSave} disabled={saving}
+                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
                   {saving ? "Saving…" : editingId ? "Save Changes" : "Create Section"}
                 </button>
-                <button type="button" onClick={closeForm} disabled={saving} className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors">
+                <button
+                  type="button" onClick={closeForm} disabled={saving}
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors"
+                >
                   Cancel
                 </button>
               </div>
+
             </div>
           </div>
         </div>
